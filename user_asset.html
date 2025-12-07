@@ -38,6 +38,11 @@
             width: 350px;
         }
 
+        .sidebar.expanded .logout {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .sidebar .logo {
             width: 250px;
             margin-bottom: 10px;
@@ -326,6 +331,7 @@
             cursor: pointer;
             display: block;
             margin: 10px auto 0 auto;
+            font-family: 'DM Sans', Arial, sans-serif;
         }
 
         .add-btn:hover {
@@ -382,14 +388,15 @@
         <!-- Navigation Links -->
         <div class="nav-links">
             <a href="#" onclick="toggleProfile(event)"><img src="profile.png" class="icon">Profile</a>
-            <a href="#"><img src="user_dashboard.png" class="icon">Dashboard</a>
-            <a href="#"><img src="assets.png" class="icon">Assets</a>
-            <a href="#"><img src="requests.png" class="icon">Request Log</a>
-            <a href="#"><img src="report.png" class="icon">Report</a>
+            <a href="user_dashboard.html"><img src="user_dashboard.png" class="icon">Dashboard</a>
+            <a href="user_asset.html"><img src="assets.png" class="icon">Assets</a>
+            <a href="user_request.html"><img src="requests.png" class="icon">Request Log</a>
+            <a href="user_report.html"><img src="report.png" class="icon">Report</a>
         </div>
 
-        <button class="logout-btn">
-            <img src="logout.png" alt="Logout">
+
+        <button class="logout-btn" onclick="window.location.href='landing_page.html'">
+        <img src="logout.png" alt="Logout">
             Log out
         </button>
 

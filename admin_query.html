@@ -38,6 +38,11 @@
             width: 350px;
         }
 
+        .sidebar.expanded .logout {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .sidebar .logo {
             width: 250px;
             margin-bottom: 10px;
@@ -350,13 +355,14 @@
         <!-- Navigation Links -->
         <div class="nav-links">
             <a href="#" onclick="toggleProfile(event)"><img src="profile.png" class="icon">Profile</a>
-            <a href="#"><img src="user_dashboard.png" class="icon">Dashboard</a>
-            <a href="#"><img src="employees.png" class="icon">Employees</a>
-            <a href="#"><img src="departments.png" class="icon">Departments</a>
-            <a href="#"><img src="audit.png" class="icon">Audit</a>
-            <a href="#"><img src="query.png" class="icon">Query Analyzer</a>
-            <a href="#" class="logout"><img src="logout.png" class="icon">Log Out</a>
+            <a href="admin_dashboard.html"><img src="user_dashboard.png" class="icon">Dashboard</a>
+            <a href="admin_employees.html"><img src="employees.png" class="icon">Employees</a>
+            <a href="admin_departments.html"><img src="departments.png" class="icon">Departments</a>
+            <a href="admin_audit.html"><img src="audit.png" class="icon">Audit</a>
+            <a href="admin_query.html"><img src="query.png" class="icon">Query Analyzer</a>
         </div>
+
+            <a href="landing_page.html" class="logout"><img src="logout.png" class="icon">Log Out</a>
 
         <!-- Profile Panel (Hidden by default) -->
         <div class="profile-panel">
@@ -380,7 +386,7 @@
                 <h2>SQL Query</h2>
                 <div class="query-editor">
                     <div class="line-numbers" id="lineNumbers">1</div>
-                    <textarea class="query-input" id="queryInput" placeholder="Enter your SQL query here...">SELECT asset_id, asset_name, quantity FROM tbl_asset;</textarea>
+                    <textarea class="query-input" id="queryInput" placeholder="Enter your query here...">SELECT asset_id, asset_name, quantity FROM tbl_asset;</textarea>
                 </div>
                 <div class="button-row">
                     <button class="clear-btn" onclick="clearQuery()">Clear</button>

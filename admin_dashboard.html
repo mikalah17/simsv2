@@ -177,6 +177,11 @@
             margin-left: 350px;
         }
 
+        .sidebar.expanded .logout {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .main-content h1 {
             color: white;
             margin-bottom: 30px;
@@ -220,7 +225,7 @@
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            color: rgba(15, 27, 101, 0.76);
+            color: #0F1B65;
             display: flex;
             flex-direction: column;
             gap: 5px;
@@ -237,14 +242,15 @@
         <!-- Navigation Links -->
         <div class="nav-links">
             <a href="#" onclick="toggleProfile(event)"><img src="profile.png" class="icon">Profile</a>
-            <a href="#"><img src="user_dashboard.png" class="icon">Dashboard</a>
-            <a href="#"><img src="employees.png" class="icon">Employees</a>
-            <a href="#"><img src="departments.png" class="icon">Departments</a>
-            <a href="#"><img src="audit.png" class="icon">Audit</a>
-            <a href="#"><img src="query.png" class="icon">Query Analyzer</a>
-            <a href="#" class="logout"><img src="logout.png" class="icon">Log Out</a>
+            <a href="admin_dashboard.html"><img src="user_dashboard.png" class="icon">Dashboard</a>
+            <a href="admin_employees.html"><img src="employees.png" class="icon">Employees</a>
+            <a href="admin_departments.html"><img src="departments.png" class="icon">Departments</a>
+            <a href="admin_audit.html"><img src="audit.png" class="icon">Audit</a>
+            <a href="admin_query.html"><img src="query.png" class="icon">Query Analyzer</a>
         </div>
 
+        <a href="landing_page.html" class="logout"><img src="logout.png" class="icon">Log Out</a>
+        
         <!-- Profile Panel (Hidden by default) -->
         <div class="profile-panel">
             <div class="profile-name">FName<br>LName</div>
