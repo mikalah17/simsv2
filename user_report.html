@@ -57,8 +57,7 @@
             transition: opacity 0.2s ease;
         }
 
-        .sidebar.expanded .nav-links,
-        .sidebar.expanded .logout-btn {
+        .sidebar.expanded .nav-links {
             opacity: 0;
             pointer-events: none;
         }
@@ -79,7 +78,7 @@
         }
 
         .sidebar a:hover {
-            background:  rgba(15, 27, 101, 0.67);
+            background: rgba(15, 27, 101, 0.67);
         }
 
         .sidebar a .icon {
@@ -88,31 +87,16 @@
             margin-right: 12px;
         }
 
-        .logout-btn {
+        /* FIXED DASHBOARD LOGOUT */
+        .sidebar a.logout {
             margin-top: auto;
             margin-bottom: 40px;
-            padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 10px;
-            transition: opacity 0.2s ease, background 0.3s;
         }
 
-        .logout-btn:hover {
+        .sidebar a.logout:hover {
             background: rgba(15, 27, 101, 0.85);
-        }
-
-        .logout-btn img {
-            width: 20px;
-            height: 20px;
         }
 
         /* Profile Panel */
@@ -255,8 +239,6 @@
             color: #0F1B65;
             font-size: 14px;
             cursor: pointer;
-            -webkit-appearance: none;
-            -moz-appearance: none;
             appearance: none;
         }
 
@@ -291,6 +273,7 @@
 </head>
 
 <body>
+
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <img src="sims_logo.png" class="logo">
@@ -304,19 +287,17 @@
             <a href="user_report.html"><img src="report.png" class="icon">Report</a>
         </div>
 
-
-        <button class="logout-btn" onclick="window.location.href='landing_page.html'">
-        <img src="logout.png" alt="Logout">
-            Log out
-        </button>
+        <!-- FIXED LOGOUT (DASHBOARD STYLE) -->
+        <a href="landing_page.html" class="logout">
+            <img src="logout.png" class="icon">Log Out
+        </a>
 
         <!-- Profile Panel -->
         <div class="profile-panel">
             <div class="profile-name">FName<br>LName</div>
             <div class="profile-email">email@gmail.com</div>
             <button class="profile-logout">
-                <img src="logout.png">
-                Log out
+                <img src="logout.png">Log out
             </button>
         </div>
     </div>
@@ -385,11 +366,10 @@
         const sidebar = document.getElementById('sidebar');
         let profileOpen = false;
 
-        // Toggle Profile Panel
         function toggleProfile(event) {
             event.preventDefault();
             profileOpen = !profileOpen;
-            
+
             if (profileOpen) {
                 sidebar.classList.add('expanded');
             } else {
@@ -397,7 +377,6 @@
             }
         }
 
-        // Close profile when clicking outside
         document.addEventListener('click', function(event) {
             if (profileOpen && !sidebar.contains(event.target)) {
                 sidebar.classList.remove('expanded');
@@ -411,47 +390,46 @@
             type: 'line',
             data: {
                 labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                datasets: [{
-                    label: 'Finance',
-                    data: [55, 30, 115, 40, 65, 30, 20],
-                    borderColor: '#4472C4',
-                    backgroundColor: '#4472C4',
-                    tension: 0.4
-                }, {
-                    label: 'IT',
-                    data: [100, 70, 30, 70, 30, 50, 30],
-                    borderColor: '#FFC000',
-                    backgroundColor: '#FFC000',
-                    tension: 0.4
-                }, {
-                    label: 'HR',
-                    data: [10, 15, 30, 90, 40, 45, 20],
-                    borderColor: '#FF0000',
-                    backgroundColor: '#FF0000',
-                    tension: 0.4
-                }, {
-                    label: 'Operations',
-                    data: [120, 80, 35, 70, 15, 20, 18],
-                    borderColor: '#FF00FF',
-                    backgroundColor: '#FF00FF',
-                    tension: 0.4
-                }]
+                datasets: [
+                    {
+                        label: 'Finance',
+                        data: [55, 30, 115, 40, 65, 30, 20],
+                        borderColor: '#4472C4',
+                        backgroundColor: '#4472C4',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'IT',
+                        data: [100, 70, 30, 70, 30, 50, 30],
+                        borderColor: '#FFC000',
+                        backgroundColor: '#FFC000',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'HR',
+                        data: [10, 15, 30, 90, 40, 45, 20],
+                        borderColor: '#FF0000',
+                        backgroundColor: '#FF0000',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Operations',
+                        data: [120, 80, 35, 70, 15, 20, 18],
+                        borderColor: '#FF00FF',
+                        backgroundColor: '#FF00FF',
+                        tension: 0.4
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     y: {
                         beginAtZero: true,
                         max: 120,
-                        ticks: {
-                            stepSize: 10
-                        }
+                        ticks: { stepSize: 10 }
                     }
                 }
             }
@@ -497,5 +475,6 @@
             }
         });
     </script>
+
 </body>
 </html>
