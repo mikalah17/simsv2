@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'DM Sans', Arial, sans-serif;
+            background-image: url("sims_bg.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 220px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar.expanded {
+            width: 350px;
+        }
+
+
+        .sidebar .logo {
+            width: 250px;
+            margin-bottom: 10px;
+        }
+
+        .nav-links {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .nav-links {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+
+        .sidebar a {
+            width: 90%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 10px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+
+        .sidebar a:hover {
+            background: rgba(15, 27, 101, 0.67);
+        }
+
+
+        .sidebar a .icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 12px;
+        }
+
+
+        .sidebar a.logout {
+            margin-top: auto;
+            margin-bottom: 40px;
+            background: rgba(15, 27, 101, 0.67);
+            justify-content: center;
+        }
+
+        .sidebar a.logout:hover {
+            background: rgba(15, 27, 101, 0.85);
+        }
+
+        /* Profile Panel */
+        .profile-panel {
+            position: absolute;
+            top: 120px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 120px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 30px;
+            box-sizing: border-box;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease 0.1s;
+        }
+
+        .sidebar.expanded .profile-panel {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .profile-name {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin: 5px 0;
+            line-height: 1.2;
+        }
+
+        .profile-email {
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            margin: 10px 0 0 0;
+        }
+
+        .profile-logout {
+            margin-top: auto;
+            margin-bottom: 20px;
+            padding: 12px 30px;
+            background: rgba(15, 27, 101, 0.67);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .profile-logout:hover {
+            background: rgba(15, 27, 101, 0.85);
+        }
+
+        .profile-logout img {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: 220px;
+            padding: 40px;
+            height: 100vh;
+            box-sizing: border-box;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.expanded ~ .main-content {
+            margin-left: 350px;
+        }
+
+
+        .main-content h1 {
+            color: white;
+            margin: 0 0 25px 0;
+            font-size: 36px;
+        }
+
+
+        /* Layout of main panel */
+        .content-wrapper {
+            display: flex;
+            gap: 25px;
+            height: calc(100vh - 120px);
+        }
+
+
+        /* LEFT PANEL */
+        .request-panel {
+            flex: 2;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            padding: 25px;
+            border-radius: 18px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+
+        .search-bar {
+            width: 200px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+        }
+
+
+        .sort-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: #0F1B65;
+        }
+
+
+        .scroll-area {
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
+        }
+
+
+        .inner-card {
+            background: rgba(255,255,255,0.85);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            color: #0F1B65;
+            box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
+        }
+
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+
+        /* RIGHT PANEL */
+        .right-panel {
+            flex: 1;
+            background: none;
+            padding: 25px;
+            color: white;
+            text-align: center;
+        }
+
+
+        .right-panel h2 {
+            margin-bottom: 30px;
+        }
+
+
+        .right-panel label {
+            display: block;
+            text-align: left;
+            margin-left: 15px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+
+        .right-panel input {
+            width: 92%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 18px;
+            outline: none;
+        }
+
+
+        .log-btn {
+            width: 60%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            background: #0F1B65;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 10px auto 0 auto;
+        }
+
+
+        .log-btn:hover {
+            background: #162897;
+        }
+    </style>
+</head>
+
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <img src="sims_logo.png" class="logo">
+
+        <!-- Navigation Links -->
+        <div class="nav-links">
+            <a href="#" onclick="toggleProfile(event)"><img src="profile.png" class="icon">Profile</a>
+            <a href="#"><img src="user_dashboard.png" class="icon">Dashboard</a>
+            <a href="#"><img src="assets.png" class="icon">Assets</a>
+            <a href="#"><img src="requests.png" class="icon">Request Log</a>
+            <a href="#"><img src="report.png" class="icon">Report</a>
+            <a href="#" class="logout"><img src="logout.png" class="icon">Log Out</a>
+        </div>
+
+        <!-- Profile Panel (Hidden by default) -->
+        <div class="profile-panel">
+            <div class="profile-name">FName<br>LName</div>
+            <div class="profile-email">email@gmail.com</div>
+            <button class="profile-logout">
+                <img src="logout.png">
+                Log out
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Request Log</h1>
+
+
+        <div class="content-wrapper">
+            <!-- LEFT side -->
+            <div class="request-panel">
+
+
+                <div class="request-header">
+                    <input type="text" class="search-bar" placeholder="Search">
+
+
+                    <select class="sort-btn">
+                        <option>Ascending Alphabetical</option>
+                        <option>Descending Alphabetical</option>
+                        <option>Ascending Quantity</option>
+                        <option>Descending Quantity</option>
+                    </select>
+                </div>
+
+
+                <div class="scroll-area">
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Requested by:</b> Shayne</span>
+                            <span><b>Requested Item:</b> Paper</span>
+                            <span><b>Quantity:</b> 50</span>
+                            <span><b>Department:</b> HR</span>
+                            <span><b>Date:</b> 12/7/2025</span>
+                        </div>
+                    </div>
+
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Requested by:</b> John</span>
+                            <span><b>Requested Item:</b> Laptop</span>
+                            <span><b>Quantity:</b> 2</span>
+                            <span><b>Department:</b> IT</span>
+                            <span><b>Date:</b> 12/6/2025</span>
+                        </div>
+                    </div>
+
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Requested by:</b> Maria</span>
+                            <span><b>Requested Item:</b> Chair</span>
+                            <span><b>Quantity:</b> 5</span>
+                            <span><b>Department:</b> Finance</span>
+                            <span><b>Date:</b> 12/5/2025</span>
+                        </div>
+                    </div>
+
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Requested by:</b> Alex</span>
+                            <span><b>Requested Item:</b> Monitor</span>
+                            <span><b>Quantity:</b> 3</span>
+                            <span><b>Department:</b> Marketing</span>
+                            <span><b>Date:</b> 12/4/2025</span>
+                        </div>
+                    </div>
+
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Requested by:</b> Sarah</span>
+                            <span><b>Requested Item:</b> Keyboard</span>
+                            <span><b>Quantity:</b> 10</span>
+                            <span><b>Department:</b> Sales</span>
+                            <span><b>Date:</b> 12/3/2025</span>
+                        </div>
+                    </div>
+
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Requested by:</b> Mike</span>
+                            <span><b>Requested Item:</b> Mouse</span>
+                            <span><b>Quantity:</b> 15</span>
+                            <span><b>Department:</b> Operations</span>
+                            <span><b>Date:</b> 12/2/2025</span>
+                        </div>
+                    </div>
+
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Requested by:</b> Lisa</span>
+                            <span><b>Requested Item:</b> Desk</span>
+                            <span><b>Quantity:</b> 4</span>
+                            <span><b>Department:</b> Admin</span>
+                            <span><b>Date:</b> 12/1/2025</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT side - Log Request Panel -->
+            <div class="right-panel">
+                <h2>Log a Request</h2>
+
+
+                <label>Requested By:</label>
+                <input type="text" id="addRequestedBy">
+
+
+                <label>Requested Item:</label>
+                <input type="text" id="addRequestedItem">
+
+
+                <label>Quantity:</label>
+                <input type="number" id="addRequestedQuantity">
+
+
+                <label>Department:</label>
+                <input type="text" id="addRequestedDepartment">
+
+
+                <label>Date:</label>
+                <input type="date" id="addRequestedDate">
+
+
+                <button class="log-btn">Log Request</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        let profileOpen = false;
+
+        // Toggle Profile Panel
+        function toggleProfile(event) {
+            event.preventDefault();
+            profileOpen = !profileOpen;
+            
+            if (profileOpen) {
+                sidebar.classList.add('expanded');
+            } else {
+                sidebar.classList.remove('expanded');
+            }
+        }
+
+        // Close profile when clicking outside
+        document.addEventListener('click', function(event) {
+            if (profileOpen && !sidebar.contains(event.target)) {
+                sidebar.classList.remove('expanded');
+                profileOpen = false;
+            }
+        });
+    </script>
+</body>
+</html>
