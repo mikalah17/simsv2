@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+        <style>
+        html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: 'DM Sans', Arial, sans-serif;
+        }
+
+        body {
+        background-image: url("sims_bg.png");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        }
+
+        .landing-page {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 420px;
+        padding: 40px;
+        
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        border-radius: 25px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        color: white;
+        }
+
+        .logo {
+        width: 400px;         
+        height: auto;
+        display: block;
+        margin: 0 auto;   
+        }
+
+        h2 {
+        margin-top: 0px;    
+        margin-bottom: 50px;   
+        font-size: 22px;   
+        color: white;
+        }
+
+        .btn1, .btn2 {
+        width: 40%;
+        padding: 15px;
+        background: #2641a5;
+        color: white;
+        font-size: 17px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-top: 15px;
+        margin-left: 20px;
+        transition: 0.3s;
+        }
+
+         .btn1:hover {
+        background: #1d3180;
+        }
+
+        .btn2:hover {
+        background: #1d3180;
+        }
+        </style>
+    </head>
+
+    <body>
+        <div class="landing-page">
+            <img src="sims_logo_text.png" class="logo">
+            <h2>Welcome.</h2>
+
+            <button class="btn1">Sign-in</button>
+            <button class="btn2">Sign-up</button>
+        </div>
+    </body>
+</html>
