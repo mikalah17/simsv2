@@ -78,7 +78,7 @@
             background: rgba(15, 27, 101, 0.85); 
         }
 
-        /* Main content */
+        /* Main Page Layout */
         .main-content {
             margin-left: 220px;
             padding: 40px;
@@ -98,8 +98,8 @@
             height: calc(100vh - 120px);
         }
 
-        /* LEFT PANEL – Employee List */
-        .employees-panel {
+        /* LEFT PANEL — Department List */
+        .department-list-panel {
             flex: 2;
             background: rgba(255,255,255,0.12);
             backdrop-filter: blur(8px);
@@ -110,7 +110,7 @@
             flex-direction: column;
         }
 
-        .employees-header {
+        .department-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -125,19 +125,17 @@
             outline: none;
         }
 
-        .sort-btn {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-color: white;
-            box-sizing: border-box;
-
+        .sort-dept-btn {
             padding: 8px 15px;
             border-radius: 20px;
             border: none;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             color: #0F1B65;
+            background: white;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         .scroll-area {
@@ -154,7 +152,7 @@
             border-radius: 5px;
         }
 
-        .inner-card {
+        .dept-card {
             background: rgba(255,255,255,0.85);
             padding: 15px;
             border-radius: 12px;
@@ -167,30 +165,29 @@
             align-items: center;
         }
 
-        .inner-card .info {
-            font-size: 15px;
+        .dept-info {
             line-height: 1.3em;
         }
 
-        .edit-btn {
+        .dept-edit-btn {
             background: transparent;
             border: none;
             color: #0f6513;
-            font-weight: bold;
             font-size: 16px;
             cursor: pointer;
             padding: 5px 10px;
+            font-weight: bold;
         }
 
-        /* RIGHT PANEL – Add Employee */
-        .add-employee-panel {
+        /* RIGHT PANEL — Add Department */
+        .add-department-panel {
             flex: 1;
             padding: 25px;
             color: white;
             text-align: center;
         }
 
-        .add-employee-panel label {
+        .add-department-panel label {
             display: block;
             text-align: left;
             margin-left: 15px;
@@ -198,8 +195,7 @@
             font-weight: 600;
         }
 
-        .add-employee-panel input,
-        .add-employee-panel select {
+        .add-department-panel input {
             width: 100%;
             padding: 10px 12px;
             border-radius: 12px;
@@ -207,11 +203,7 @@
             margin-bottom: 18px;
             outline: none;
             background-color: white;
-
             box-sizing: border-box;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
         }
 
         .add-btn {
@@ -248,32 +240,32 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <h1>Employees</h1>
+        <h1>Departments</h1>
 
         <div class="content-wrapper">
 
-            <!-- LEFT: Employee List -->
-            <div class="employees-panel">
+            <!-- LEFT: Department Cards -->
+            <div class="department-list-panel">
 
-                <div class="employees-header">
+                <div class="department-header">
                     <input type="text" class="search-bar" placeholder="Search">
 
-                    <select class="sort-btn">
-                        <option>Ascending Name</option>
-                        <option>Descending Name</option>
-                        <option>Department A-Z</option>
-                        <option>Department Z-A</option>
+                    <select class="sort-dept-btn">
+                        <option>Ascending A–Z</option>
+                        <option>Descending Z–A</option>
+                        <option>Most Employees</option>
+                        <option>Least Employees</option>
                     </select>
                 </div>
 
                 <div class="scroll-area">
 
-                    <div class="inner-card">
-                        <div class="info">
-                            <b>Name:</b> John Doe<br>
-                            <b>Department:</b> IT
+                    <div class="dept-card">
+                        <div class="dept-info">
+                            <b>Department:</b> IT<br>
+                            <b>Employees:</b> 10
                         </div>
-                        <button class="edit-btn">Edit</button>
+                        <button class="dept-edit-btn">Edit</button>
                     </div>
 
                     <!-- Repeat as needed -->
@@ -282,28 +274,15 @@
 
             </div>
 
-            <!-- RIGHT: Add Employee -->
-            <div class="add-employee-panel">
+            <!-- RIGHT: Add Department -->
+            <div class="add-department-panel">
 
-                <h2>Add Employee</h2>
+                <h2>Add Department</h2>
 
-                <label>First Name:</label>
+                <label>Department Name:</label>
                 <input type="text">
 
-                <label>Last Name:</label>
-                <input type="text">
-
-                <label>Department:</label>
-                <select>
-                    <option disabled selected>Select department</option>
-                    <option>HR</option>
-                    <option>Finance</option>
-                    <option>IT</option>
-                    <option>Admin</option>
-                    <option>Maintenance</option>
-                </select>
-
-                <button class="add-btn">Add Employee</button>
+                <button class="add-btn">Add Department</button>
             </div>
 
         </div>
