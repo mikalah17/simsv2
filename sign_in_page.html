@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+
+    html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'DM Sans', Arial, sans-serif;
+}
+
+
+    body {
+        background-image: url("sims_bg.png");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    /* Center container */
+    .login-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 420px;
+        padding: 40px;
+        
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        border-radius: 25px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        color: white;
+    }
+
+    .logo {
+         width: 250px; 
+         height: auto;
+         margin-bottom: 5px;
+    }
+
+    h2 {
+        margin: 5px 0 15px;
+        font-size: 26px;
+        color: white;
+    }
+
+    label {
+    display: block;
+    text-align: left;
+    font-size: 14px;
+    margin: 10px 0 5px 0;
+    color: white;
+}
+
+
+    input {
+        width: 90%;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        font-size: 15px;
+    }
+
+    .btn {
+        width: 95%;
+        padding: 12px;
+        background: #2641a5;
+        color: white;
+        font-size: 17px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: 0.3s;
+    }
+
+    .btn:hover {
+        background: #1d3180;
+    }
+
+    .link {
+        margin-top: 15px;
+        display: block;
+        color: white;
+        font-size: 14px;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    
+</style>
+</head>
+<body>
+
+<div class="login-container">
+
+    
+    <img src="sims_logo_text.png" class="logo">
+
+    <h2>Sign-in to your account.</h2>
+
+    <label for="email"><b>Email</b></label>
+    <input type="text" id="email" placeholder="Enter your email">
+
+    <label for="password"><b>Password</b></label>
+    <input type="password" id="password" placeholder="Enter your password">
+
+    <button class="btn">Sign-in</button>
+    <a class="link">Don't have an account? Create one.</a>
+
+
+</div>
+
+</body>
+</html>
