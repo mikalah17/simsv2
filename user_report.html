@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'DM Sans', Arial, sans-serif;
+            background-image: url("sims_bg.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 220px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar.expanded {
+            width: 350px;
+        }
+
+        .sidebar .logo {
+            width: 250px;
+            margin-bottom: 10px;
+        }
+
+        .nav-links {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .nav-links,
+        .sidebar.expanded .logout-btn {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar a {
+            width: 90%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 10px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .sidebar a:hover {
+            background:  rgba(15, 27, 101, 0.67);
+        }
+
+        .sidebar a .icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 12px;
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            margin-bottom: 40px;
+            padding: 12px 30px;
+            background: rgba(15, 27, 101, 0.67);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: opacity 0.2s ease, background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(15, 27, 101, 0.85);
+        }
+
+        .logout-btn img {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Profile Panel */
+        .profile-panel {
+            position: absolute;
+            top: 120px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 120px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 30px;
+            box-sizing: border-box;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease 0.1s;
+        }
+
+        .sidebar.expanded .profile-panel {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .profile-name {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin: 5px 0;
+            line-height: 1.2;
+        }
+
+        .profile-email {
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            margin: 10px 0 0 0;
+        }
+
+        .profile-logout {
+            margin-top: auto;
+            margin-bottom: 20px;
+            padding: 12px 30px;
+            background: rgba(15, 27, 101, 0.67);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .profile-logout:hover {
+            background: rgba(15, 27, 101, 0.85);
+        }
+
+        .profile-logout img {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: 220px;
+            padding: 40px;
+            height: 100vh;
+            box-sizing: border-box;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.expanded ~ .main-content {
+            margin-left: 350px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .main-content h1 {
+            color: white;
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .generate-btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            background: rgba(15, 27, 101, 0.8);
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .generate-btn:hover {
+            background: rgba(15, 27, 101, 1);
+        }
+
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            height: calc(100vh - 140px);
+        }
+
+        .chart-panel {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(8px);
+            padding: 25px;
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .time-filter, .dept-filter {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: rgba(100, 120, 200, 0.2);
+            border: none;
+            font-weight: 700;
+            color: #0F1B65;
+            font-size: 14px;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .legend {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #0F1B65;
+            font-weight: 600;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <img src="sims_logo.png" class="logo">
+
+        <!-- Navigation Links -->
+        <div class="nav-links">
+            <a href="#" onclick="toggleProfile(event)"><img src="profile.png" class="icon">Profile</a>
+            <a href="#"><img src="user_dashboard.png" class="icon">Dashboard</a>
+            <a href="#"><img src="assets.png" class="icon">Assets</a>
+            <a href="#"><img src="requests.png" class="icon">Request Log</a>
+            <a href="#"><img src="report.png" class="icon">Report</a>
+        </div>
+
+        <button class="logout-btn">
+            <img src="logout.png" alt="Logout">
+            Log out
+        </button>
+
+        <!-- Profile Panel -->
+        <div class="profile-panel">
+            <div class="profile-name">FName<br>LName</div>
+            <div class="profile-email">email@gmail.com</div>
+            <button class="profile-logout">
+                <img src="logout.png">
+                Log out
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header-section">
+            <h1>Reports</h1>
+            <button class="generate-btn">Generate Report</button>
+        </div>
+
+        <div class="charts-container">
+            <!-- Line Chart Panel -->
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <select class="time-filter">
+                        <option>Last 7 days</option>
+                        <option>Last 14 days</option>
+                        <option>Last 30 days</option>
+                        <option>Last 3 months</option>
+                        <option>Last 6 months</option>
+                        <option>Last year</option>
+                    </select>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4472C4;"></div>
+                        <span>Finance Department</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FFC000;"></div>
+                        <span>Information Technology Department</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FF0000;"></div>
+                        <span>Human Resource Department</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FF00FF;"></div>
+                        <span>Operation Management Department</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie Chart Panel -->
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <select class="dept-filter">
+                        <option>Finance Department</option>
+                        <option>Information Technology Department</option>
+                        <option>Human Resource Department</option>
+                        <option>Operation Management Department</option>
+                    </select>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        let profileOpen = false;
+
+        // Toggle Profile Panel
+        function toggleProfile(event) {
+            event.preventDefault();
+            profileOpen = !profileOpen;
+            
+            if (profileOpen) {
+                sidebar.classList.add('expanded');
+            } else {
+                sidebar.classList.remove('expanded');
+            }
+        }
+
+        // Close profile when clicking outside
+        document.addEventListener('click', function(event) {
+            if (profileOpen && !sidebar.contains(event.target)) {
+                sidebar.classList.remove('expanded');
+                profileOpen = false;
+            }
+        });
+
+        // Line Chart
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        const lineChart = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                datasets: [{
+                    label: 'Finance',
+                    data: [55, 30, 115, 40, 65, 30, 20],
+                    borderColor: '#4472C4',
+                    backgroundColor: '#4472C4',
+                    tension: 0.4
+                }, {
+                    label: 'IT',
+                    data: [100, 70, 30, 70, 30, 50, 30],
+                    borderColor: '#FFC000',
+                    backgroundColor: '#FFC000',
+                    tension: 0.4
+                }, {
+                    label: 'HR',
+                    data: [10, 15, 30, 90, 40, 45, 20],
+                    borderColor: '#FF0000',
+                    backgroundColor: '#FF0000',
+                    tension: 0.4
+                }, {
+                    label: 'Operations',
+                    data: [120, 80, 35, 70, 15, 20, 18],
+                    borderColor: '#FF00FF',
+                    backgroundColor: '#FF00FF',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 120,
+                        ticks: {
+                            stepSize: 10
+                        }
+                    }
+                }
+            }
+        });
+
+        // Pie Chart
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Clip', 'Folder', 'Staples', 'Ballpen', 'Paper'],
+                datasets: [{
+                    data: [15, 30, 15, 15, 25],
+                    backgroundColor: [
+                        '#FF6B6B',
+                        '#4ECDC4',
+                        '#FFE66D',
+                        '#95E1D3',
+                        '#A8E6CF'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold',
+                                family: 'DM Sans'
+                            },
+                            color: '#0F1B65',
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
