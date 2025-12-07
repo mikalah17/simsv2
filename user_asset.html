@@ -148,11 +148,31 @@
 
         .inner-card {
             background: rgba(255,255,255,0.85);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 15px;
             border-radius: 12px;
             margin-bottom: 12px;
             color: #0F1B65;
             box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .inner-card .edit-btn {
+            background: transparent;
+            border: none;
+            color: #0f6513;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px 10px;
+            flex-shrink: 0;
         }
 
         /* RIGHT PANEL */
@@ -177,7 +197,7 @@
             padding: 10px 12px;
             border-radius: 12px;
             border: none;
-            margin-bottom: 18px; /* 🔥 Added more gap */
+            margin-bottom: 18px;
             outline: none;
         }
 
@@ -235,13 +255,61 @@
                 </div>
 
                 <div class="scroll-area">
-                    <div class="inner-card"><b>Item:</b> Laptop<br><b>Quantity:</b> 12</div>
-                    <div class="inner-card"><b>Item:</b> Chair<br><b>Quantity:</b> 40</div>
-                    <div class="inner-card"><b>Item:</b> Desk<br><b>Quantity:</b> 22</div>
-                    <div class="inner-card"><b>Item:</b> Router<br><b>Quantity:</b> 6</div>
-                    <div class="inner-card"><b>Item:</b> Mouse<br><b>Quantity:</b> 50</div>
-                    <div class="inner-card"><b>Item:</b> Keyboard<br><b>Quantity:</b> 35</div>
-                    <div class="inner-card"><b>Item:</b> Monitor<br><b>Quantity:</b> 18</div>
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Item:</b> Laptop</span>
+                            <span><b>Quantity:</b> 12</span>
+                        </div>
+                        <button class="edit-btn">Edit</button>
+                    </div>
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Item:</b> Chair</span>
+                            <span><b>Quantity:</b> 40</span>
+                        </div>
+                        <button class="edit-btn">Edit</button>
+                    </div>
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Item:</b> Desk</span>
+                            <span><b>Quantity:</b> 22</span>
+                        </div>
+                        <button class="edit-btn">Edit</button>
+                    </div>
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Item:</b> Router</span>
+                            <span><b>Quantity:</b> 6</span>
+                        </div>
+                        <button class="edit-btn">Edit</button>
+                    </div>
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Item:</b> Mouse</span>
+                            <span><b>Quantity:</b> 50</span>
+                        </div>
+                        <button class="edit-btn">Edit</button>
+                    </div>
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Item:</b> Keyboard</span>
+                            <span><b>Quantity:</b> 35</span>
+                        </div>
+                        <button class="edit-btn">Edit</button>
+                    </div>
+
+                    <div class="inner-card">
+                        <div class="item-details">
+                            <span><b>Item:</b> Monitor</span>
+                            <span><b>Quantity:</b> 18</span>
+                        </div>
+                        <button class="edit-btn">Edit</button>
+                    </div>
                 </div>
 
             </div>
