@@ -269,7 +269,7 @@
         }
 
         /* RIGHT PANEL */
-        .add-item-panel {
+        .right-panel {
             flex: 1;
             background: none;
             padding: 25px;
@@ -277,7 +277,11 @@
             text-align: center;
         }
 
-        .add-item-panel label {
+        .right-panel h2 {
+            margin-bottom: 30px;
+        }
+
+        .right-panel label {
             display: block;
             text-align: left;
             margin-left: 15px;
@@ -285,7 +289,7 @@
             font-weight: 600;
         }
 
-        .add-item-panel input {
+        .right-panel input {
             width: 92%;
             padding: 10px 12px;
             border-radius: 12px;
@@ -309,6 +313,46 @@
 
         .add-btn:hover {
             background: #162897;
+        }
+
+        /* Edit panel buttons */
+        .edit-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .delete-btn {
+            padding: 10px 25px;
+            border-radius: 15px;
+            background: #d32f2f;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #b71c1c;
+        }
+
+        .save-btn {
+            padding: 10px 25px;
+            border-radius: 15px;
+            background: #0F1B65;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background: #162897;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -365,7 +409,7 @@
                             <span><b>Item:</b> Laptop</span>
                             <span><b>Quantity:</b> 12</span>
                         </div>
-                        <button class="edit-btn">Edit</button>
+                        <button class="edit-btn" onclick="showEditPanel('Laptop', 12)">Edit</button>
                     </div>
 
                     <div class="inner-card">
@@ -373,7 +417,7 @@
                             <span><b>Item:</b> Chair</span>
                             <span><b>Quantity:</b> 40</span>
                         </div>
-                        <button class="edit-btn">Edit</button>
+                        <button class="edit-btn" onclick="showEditPanel('Chair', 40)">Edit</button>
                     </div>
 
                     <div class="inner-card">
@@ -381,7 +425,7 @@
                             <span><b>Item:</b> Desk</span>
                             <span><b>Quantity:</b> 22</span>
                         </div>
-                        <button class="edit-btn">Edit</button>
+                        <button class="edit-btn" onclick="showEditPanel('Desk', 22)">Edit</button>
                     </div>
 
                     <div class="inner-card">
@@ -389,7 +433,7 @@
                             <span><b>Item:</b> Router</span>
                             <span><b>Quantity:</b> 6</span>
                         </div>
-                        <button class="edit-btn">Edit</button>
+                        <button class="edit-btn" onclick="showEditPanel('Router', 6)">Edit</button>
                     </div>
 
                     <div class="inner-card">
@@ -397,7 +441,7 @@
                             <span><b>Item:</b> Mouse</span>
                             <span><b>Quantity:</b> 50</span>
                         </div>
-                        <button class="edit-btn">Edit</button>
+                        <button class="edit-btn" onclick="showEditPanel('Mouse', 50)">Edit</button>
                     </div>
 
                     <div class="inner-card">
@@ -405,7 +449,7 @@
                             <span><b>Item:</b> Keyboard</span>
                             <span><b>Quantity:</b> 35</span>
                         </div>
-                        <button class="edit-btn">Edit</button>
+                        <button class="edit-btn" onclick="showEditPanel('Keyboard', 35)">Edit</button>
                     </div>
 
                     <div class="inner-card">
@@ -413,24 +457,39 @@
                             <span><b>Item:</b> Monitor</span>
                             <span><b>Quantity:</b> 18</span>
                         </div>
-                        <button class="edit-btn">Edit</button>
+                        <button class="edit-btn" onclick="showEditPanel('Monitor', 18)">Edit</button>
                     </div>
                 </div>
 
             </div>
 
-            <!-- RIGHT side -->
-            <div class="add-item-panel">
-
+            <!-- RIGHT side - Add Item Panel -->
+            <div class="right-panel" id="addPanel">
                 <h2>Add an Item</h2>
 
                 <label>Item:</label>
-                <input type="text">
+                <input type="text" id="addItemName">
 
                 <label>Quantity:</label>
-                <input type="number">
+                <input type="number" id="addItemQuantity">
 
                 <button class="add-btn">Add Asset</button>
+            </div>
+
+            <!-- RIGHT side - Edit Item Panel -->
+            <div class="right-panel hidden" id="editPanel">
+                <h2>Edit an Item</h2>
+
+                <label>Item:</label>
+                <input type="text" id="editItemName">
+
+                <label>Quantity:</label>
+                <input type="number" id="editItemQuantity">
+
+                <div class="edit-buttons">
+                    <button class="delete-btn" onclick="deleteItem()">Delete</button>
+                    <button class="save-btn" onclick="saveItem()">Save</button>
+                </div>
             </div>
 
         </div>
@@ -459,6 +518,38 @@
                 profileOpen = false;
             }
         });
+
+        // Show Edit Panel
+        function showEditPanel(itemName, quantity) {
+            document.getElementById('addPanel').classList.add('hidden');
+            document.getElementById('editPanel').classList.remove('hidden');
+            
+            document.getElementById('editItemName').value = itemName;
+            document.getElementById('editItemQuantity').value = quantity;
+        }
+
+        // Save Item
+        function saveItem() {
+            const itemName = document.getElementById('editItemName').value;
+            const quantity = document.getElementById('editItemQuantity').value;
+            
+            alert(`Saved: ${itemName} with quantity ${quantity}`);
+            
+            document.getElementById('editPanel').classList.add('hidden');
+            document.getElementById('addPanel').classList.remove('hidden');
+        }
+
+        // Delete Item
+        function deleteItem() {
+            const itemName = document.getElementById('editItemName').value;
+            
+            if (confirm(`Are you sure you want to delete ${itemName}?`)) {
+                alert(`Deleted: ${itemName}`);
+                
+                document.getElementById('editPanel').classList.add('hidden');
+                document.getElementById('addPanel').classList.remove('hidden');
+            }
+        }
     </script>
 
 </body>
