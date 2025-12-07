@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'DM Sans', Arial, sans-serif;
+            background-image: url("sims_bg.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 220px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+        }
+
+        .sidebar .logo {
+            width: 250px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            width: 90%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 10px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .sidebar a:hover {
+            background:  rgba(15, 27, 101, 0.67);
+        }
+
+        .sidebar a .icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 12px;
+        }
+
+        .sidebar a.logout {
+            margin-top: auto;
+            margin-bottom: 40px;
+            background: rgba(15, 27, 101, 0.67);
+            justify-content: center;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: 220px;
+            padding: 40px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .main-content h1 {
+            color: white;
+            margin: 0 0 25px 0;
+            font-size: 36px;
+        }
+
+        /* Layout of main panel */
+        .content-wrapper {
+            display: flex;
+            gap: 25px;
+            height: calc(100vh - 120px);
+        }
+
+        /* LEFT PANEL */
+        .assets-panel {
+            flex: 2;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            padding: 25px;
+            border-radius: 18px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .assets-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .search-bar {
+            width: 200px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+        }
+
+        .sort-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: #0F1B65;
+        }
+
+        .scroll-area {
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
+        }
+
+        .inner-card {
+            background: rgba(255,255,255,0.85);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            color: #0F1B65;
+            box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
+        }
+
+        /* RIGHT PANEL */
+        .add-item-panel {
+            flex: 1;
+            background: none;
+            padding: 25px;
+            color: white;
+            text-align: center;
+        }
+
+        .add-item-panel label {
+            display: block;
+            text-align: left;
+            margin-left: 15px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .add-item-panel input {
+            width: 92%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 18px; 
+            outline: none;
+        }
+
+        .add-btn {
+            width: 60%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            background: #0F1B65;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 10px auto 0 auto;
+        }
+
+        .add-btn:hover {
+            background: #162897;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <img src="sims_logo.png" class="logo">
+
+        <a href="#"><img src="profile.png" class="icon">Profile</a>
+        <a href="#"><img src="user_dashboard.png" class="icon">Dashboard</a>
+        <a href="#"><img src="assets.png" class="icon">Assets</a>
+        <a href="#"><img src="requests.png" class="icon">Request Log</a>
+        <a href="#"><img src="report.png" class="icon">Report</a>
+
+        <a href="#" class="logout"><img src="logout.png" class="icon">Log Out</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Assets</h1>
+
+        <div class="content-wrapper">
+
+            <!-- LEFT side -->
+            <div class="assets-panel">
+
+                <div class="assets-header">
+                    <input type="text" class="search-bar" placeholder="Search">
+
+                    <select class="sort-btn">
+                        <option>Ascending Alphabetical</option>
+                        <option>Descending Alphabetical</option>
+                        <option>Ascending Quantity</option>
+                        <option>Descending Quantity</option>
+                    </select>
+                </div>
+
+                <div class="scroll-area">
+                    <div class="inner-card"><b>Item:</b> Laptop<br><b>Quantity:</b> 12</div>
+                    <div class="inner-card"><b>Item:</b> Chair<br><b>Quantity:</b> 40</div>
+                    <div class="inner-card"><b>Item:</b> Desk<br><b>Quantity:</b> 22</div>
+                    <div class="inner-card"><b>Item:</b> Router<br><b>Quantity:</b> 6</div>
+                    <div class="inner-card"><b>Item:</b> Mouse<br><b>Quantity:</b> 50</div>
+                    <div class="inner-card"><b>Item:</b> Keyboard<br><b>Quantity:</b> 35</div>
+                    <div class="inner-card"><b>Item:</b> Monitor<br><b>Quantity:</b> 18</div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT side -->
+            <div class="add-item-panel">
+
+                <h2>Add an Item</h2>
+
+                <label>Item:</label>
+                <input type="text">
+
+                <label>Quantity:</label>
+                <input type="number">
+
+                <button class="add-btn">Add Asset</button>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
