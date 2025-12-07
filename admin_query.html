@@ -249,7 +249,7 @@
             margin-top: 15px;
         }
 
-        .submit-btn, .clear-btn {
+        .submit-btn, .clear-btn, .history-btn {
             padding: 10px 25px;
             border-radius: 12px;
             border: none;
@@ -268,12 +268,12 @@
             background: #162897;
         }
 
-        .clear-btn {
+        .clear-btn, .history-btn {
             background: rgba(255,255,255,0.9);
             color: #0F1B65;
         }
 
-        .clear-btn:hover {
+        .clear-btn:hover, .history-btn:hover {
             background: white;
         }
 
@@ -358,6 +358,8 @@
             <a href="admin_dashboard.html"><img src="user_dashboard.png" class="icon">Dashboard</a>
             <a href="admin_employees.html"><img src="employees.png" class="icon">Employees</a>
             <a href="admin_departments.html"><img src="departments.png" class="icon">Departments</a>
+            <a href="admin_assets.html"><img src="assets.png" class="icon">Assets</a>
+            <a href="admin_request.html"><img src="requests.png" class="icon">Request Log</a>  
             <a href="admin_audit.html"><img src="audit.png" class="icon">Audit</a>
             <a href="admin_query.html"><img src="query.png" class="icon">Query Analyzer</a>
         </div>
@@ -383,14 +385,17 @@
 
             <!-- Query Input -->
             <div class="query-panel">
-                <h2>SQL Query</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">SQL Query</h2>
+                    <button class="history-btn" onclick="showHistory()">History</button>
+                </div>
                 <div class="query-editor">
                     <div class="line-numbers" id="lineNumbers">1</div>
                     <textarea class="query-input" id="queryInput" placeholder="Enter your query here...">SELECT asset_id, asset_name, quantity FROM tbl_asset;</textarea>
                 </div>
                 <div class="button-row">
                     <button class="clear-btn" onclick="clearQuery()">Clear</button>
-                    <button class="submit-btn" onclick="executeQuery()">Submit</button>
+                    <button class="submit-btn" onclick="executeQuery()">Generate Query</button>
                 </div>
             </div>
 
@@ -486,7 +491,11 @@
 
         function executeQuery() {
             // Placeholder for query execution
-            alert('Query executed! In a real implementation, this would send the query to your backend.');
+            alert('Query generated! In a real implementation, this would send the query to your backend.');
+        }
+
+        function showHistory() {
+            window.location.href = 'admin_queryhistory.html';
         }
     </script>
 

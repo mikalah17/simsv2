@@ -16,7 +16,6 @@
             overflow: hidden;
         }
 
-        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -77,7 +76,7 @@
         }
 
         .sidebar a:hover {
-            background:  rgba(15, 27, 101, 0.67);
+            background: rgba(15, 27, 101, 0.67);
         }
 
         .sidebar a:active {
@@ -102,7 +101,6 @@
             background: rgba(15, 27, 101, 0.85); 
         }
 
-        /* Profile Panel */
         .profile-panel {
             position: absolute;
             top: 120px;
@@ -167,12 +165,13 @@
             height: 20px;
         }
 
-        /* Main Page Layout */
         .main-content {
             margin-left: 220px;
             padding: 40px;
             height: 100vh;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
             transition: margin-left 0.3s ease;
         }
 
@@ -188,158 +187,124 @@
 
         .content-wrapper {
             display: flex;
+            flex-direction: column;
             gap: 25px;
-            height: calc(100vh - 120px);
+            flex: 1;
+            overflow: hidden;
         }
 
-        /* LEFT PANEL — Department List */
-        .department-list-panel {
-            flex: 2;
+        .history-panel {
             background: rgba(255,255,255,0.12);
             backdrop-filter: blur(8px);
             padding: 25px;
             border-radius: 18px;
             color: white;
+            flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
-        .department-header {
+        .history-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .search-bar {
-            width: 200px;
-            padding: 8px 12px;
-            border-radius: 20px;
-            border: none;
-            outline: none;
+        .history-header h2 {
+            margin: 0;
+            font-size: 24px;
         }
 
-        .sort-dept-btn {
-            padding: 8px 15px;
-            border-radius: 20px;
+        .back-btn {
+            padding: 10px 25px;
+            border-radius: 12px;
             border: none;
-            font-weight: 700;
-            cursor: pointer;
+            background: rgba(255,255,255,0.9);
             color: #0F1B65;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
             background: white;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
         }
 
-        .scroll-area {
-            overflow-y: auto;
-            padding-right: 10px;
+        .history-list {
+            flex: 1;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .scroll-area::-webkit-scrollbar {
-            width: 6px;
+        .history-list::-webkit-scrollbar {
+            width: 8px;
         }
 
-        .scroll-area::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.5);
+        .history-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 5px;
         }
 
-        .dept-card {
-            background: rgba(255,255,255,0.85);
-            padding: 15px;
+        .history-item {
+            background: rgba(255,255,255,0.95);
             border-radius: 12px;
-            margin-bottom: 12px;
+            padding: 20px;
             color: #0F1B65;
-            box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
+        }
 
+        .history-meta {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 20px;
+            margin-bottom: 12px;
+            font-size: 13px;
         }
 
-        .dept-info {
-            line-height: 1.3em;
+        .history-user {
+            color: #0F1B65;
+            font-weight: 700;
         }
 
-        .dept-edit-btn {
-            background: transparent;
-            border: none;
-            color: #0f6513;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 5px 10px;
-            font-weight: bold;
+        .history-datetime {
+            color: #666;
         }
 
-        /* RIGHT PANEL — Add Department */
-        .add-department-panel {
-            flex: 1;
-            padding: 25px;
-            color: white;
-            text-align: center;
-        }
-
-        .add-department-panel label {
-            display: block;
-            text-align: left;
-            margin-left: 15px;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .add-department-panel input {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: none;
-            margin-bottom: 18px;
-            outline: none;
-            background-color: white;
-            box-sizing: border-box;
-        }
-
-        .add-btn {
-            width: 60%;
-            padding: 10px 15px;
-            border-radius: 15px;
-            background: #0F1B65;
-            border: none;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            display: block;
-            margin: 10px auto 0 auto;
-            font-family: 'DM Sans', Arial, sans-serif;
-        }
-
-        .add-btn:hover {
-            background: #162897;
+        .history-query {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <img src="sims_logo.png" class="logo">
         
-        <!-- Navigation Links -->
         <div class="nav-links">
             <a href="#" onclick="toggleProfile(event)"><img src="profile.png" class="icon">Profile</a>
             <a href="admin_dashboard.html"><img src="user_dashboard.png" class="icon">Dashboard</a>
             <a href="admin_employees.html"><img src="employees.png" class="icon">Employees</a>
             <a href="admin_departments.html"><img src="departments.png" class="icon">Departments</a>
             <a href="admin_assets.html"><img src="assets.png" class="icon">Assets</a>
-            <a href="admin_request.html"><img src="requests.png" class="icon">Request Log</a>  
+            <a href="admin_request.html"><img src="requests.png" class="icon">Request Log</a>    
             <a href="admin_audit.html"><img src="audit.png" class="icon">Audit</a>
             <a href="admin_query.html"><img src="query.png" class="icon">Query Analyzer</a>
         </div>
 
-            <a href="landing_page.html" class="logout"><img src="logout.png" class="icon">Log Out</a>
+        <a href="landing_page.html" class="logout"><img src="logout.png" class="icon">Log Out</a>
 
-        <!-- Profile Panel (Hidden by default) -->
         <div class="profile-panel">
             <div class="profile-name">FName<br>LName</div>
             <div class="profile-email">email@gmail.com</div>
@@ -350,51 +315,70 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
-        <h1>Departments</h1>
+        <h1>Query History</h1>
 
         <div class="content-wrapper">
-
-            <!-- LEFT: Department Cards -->
-            <div class="department-list-panel">
-
-                <div class="department-header">
-                    <input type="text" class="search-bar" placeholder="Search">
-
-                    <select class="sort-dept-btn">
-                        <option>Ascending A–Z</option>
-                        <option>Descending Z–A</option>
-                        <option>Most Employees</option>
-                        <option>Least Employees</option>
-                    </select>
+            <div class="history-panel">
+                <div class="history-header">
+                    <h2>Recent Queries</h2>
+                    <a href="admin_query.html" class="back-btn">Back to Query Analyzer</a>
                 </div>
 
-                <div class="scroll-area">
-
-                    <div class="dept-card">
-                        <div class="dept-info">
-                            <b>Department:</b> IT<br>
-                            <b>Employees:</b> 10
+                <div class="history-list">
+                    <div class="history-item">
+                        <div class="history-meta">
+                            <div class="history-user">John Doe</div>
+                            <div class="history-datetime">December 8, 2025 - 2:30 PM</div>
                         </div>
-                        <button class="dept-edit-btn">Edit</button>
+                        <div class="history-query">SELECT asset_id, asset_name, quantity FROM tbl_asset;</div>
                     </div>
 
+                    <div class="history-item">
+                        <div class="history-meta">
+                            <div class="history-user">Jane Smith</div>
+                            <div class="history-datetime">December 8, 2025 - 1:15 PM</div>
+                        </div>
+                        <div class="history-query">SELECT e.employee_id, e.first_name, e.last_name, d.department_name
+FROM tbl_employee e
+JOIN tbl_department d ON e.department_id = d.department_id
+WHERE d.department_name = 'IT';</div>
+                    </div>
+
+                    <div class="history-item">
+                        <div class="history-meta">
+                            <div class="history-user">Michael Johnson</div>
+                            <div class="history-datetime">December 7, 2025 - 4:45 PM</div>
+                        </div>
+                        <div class="history-query">SELECT COUNT(*) as total_assets, SUM(quantity) as total_quantity
+FROM tbl_asset;</div>
+                    </div>
+
+                    <div class="history-item">
+                        <div class="history-meta">
+                            <div class="history-user">Sarah Williams</div>
+                            <div class="history-datetime">December 7, 2025 - 3:20 PM</div>
+                        </div>
+                        <div class="history-query">UPDATE tbl_asset SET quantity = quantity + 5 WHERE asset_id = 1;</div>
+                    </div>
+
+                    <div class="history-item">
+                        <div class="history-meta">
+                            <div class="history-user">Robert Brown</div>
+                            <div class="history-datetime">December 6, 2025 - 11:00 AM</div>
+                        </div>
+                        <div class="history-query">DELETE FROM tbl_asset WHERE quantity = 0;</div>
+                    </div>
+
+                    <div class="history-item">
+                        <div class="history-meta">
+                            <div class="history-user">Emily Davis</div>
+                            <div class="history-datetime">December 6, 2025 - 9:30 AM</div>
+                        </div>
+                        <div class="history-query">INSERT INTO tbl_asset (asset_name, quantity) VALUES ('LED Panel', 25);</div>
+                    </div>
                 </div>
-
             </div>
-
-            <!-- RIGHT: Add Department -->
-            <div class="add-department-panel">
-
-                <h2>Add Department</h2>
-
-                <label>Department Name:</label>
-                <input type="text">
-
-                <button class="add-btn">Add Department</button>
-            </div>
-
         </div>
     </div>
 
@@ -402,7 +386,6 @@
         const sidebar = document.getElementById('sidebar');
         let profileOpen = false;
 
-        // Toggle Profile Panel
         function toggleProfile(event) {
             event.preventDefault();
             profileOpen = !profileOpen;
@@ -414,7 +397,6 @@
             }
         }
 
-        // Close profile when clicking outside
         document.addEventListener('click', function(event) {
             if (profileOpen && !sidebar.contains(event.target)) {
                 sidebar.classList.remove('expanded');

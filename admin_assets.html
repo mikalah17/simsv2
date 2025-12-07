@@ -77,7 +77,7 @@
         }
 
         .sidebar a:hover {
-            background:  rgba(15, 27, 101, 0.67);
+            background: rgba(15, 27, 101, 0.67);
         }
 
         .sidebar a:active {
@@ -173,6 +173,8 @@
             padding: 40px;
             height: 100vh;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
             transition: margin-left 0.3s ease;
         }
 
@@ -188,13 +190,14 @@
 
         .content-wrapper {
             display: flex;
+            flex-direction: column;
             gap: 25px;
-            height: calc(100vh - 120px);
+            flex: 1;
+            overflow: hidden;
         }
 
-        /* LEFT PANEL — Department List */
-        .department-list-panel {
-            flex: 2;
+        /* Assets Panel */
+        .assets-panel {
             background: rgba(255,255,255,0.12);
             backdrop-filter: blur(8px);
             padding: 25px;
@@ -202,25 +205,39 @@
             color: white;
             display: flex;
             flex-direction: column;
+            flex: 1;
+            overflow: hidden;
         }
 
-        .department-header {
+        .assets-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .assets-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
         }
 
         .search-bar {
-            width: 200px;
-            padding: 8px 12px;
+            width: 250px;
+            padding: 10px 15px;
             border-radius: 20px;
             border: none;
             outline: none;
+            font-size: 14px;
         }
 
-        .sort-dept-btn {
-            padding: 8px 15px;
+        .sort-btn {
+            padding: 10px 20px;
             border-radius: 20px;
             border: none;
             font-weight: 700;
@@ -230,92 +247,56 @@
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
+            font-size: 14px;
         }
 
         .scroll-area {
             overflow-y: auto;
             padding-right: 10px;
+            flex: 1;
         }
 
         .scroll-area::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         .scroll-area::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.3);
             border-radius: 5px;
         }
 
-        .dept-card {
-            background: rgba(255,255,255,0.85);
-            padding: 15px;
+        .asset-card {
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
             border-radius: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             color: #0F1B65;
             box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
-
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            transition: 0.3s;
         }
 
-        .dept-info {
-            line-height: 1.3em;
+        .asset-card:hover {
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        .dept-edit-btn {
-            background: transparent;
-            border: none;
-            color: #0f6513;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 5px 10px;
-            font-weight: bold;
+        .asset-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
 
-        /* RIGHT PANEL — Add Department */
-        .add-department-panel {
-            flex: 1;
-            padding: 25px;
-            color: white;
+        .asset-quantity {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .no-assets {
             text-align: center;
-        }
-
-        .add-department-panel label {
-            display: block;
-            text-align: left;
-            margin-left: 15px;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .add-department-panel input {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: none;
-            margin-bottom: 18px;
-            outline: none;
-            background-color: white;
-            box-sizing: border-box;
-        }
-
-        .add-btn {
-            width: 60%;
-            padding: 10px 15px;
-            border-radius: 15px;
-            background: #0F1B65;
-            border: none;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            display: block;
-            margin: 10px auto 0 auto;
-            font-family: 'DM Sans', Arial, sans-serif;
-        }
-
-        .add-btn:hover {
-            background: #162897;
+            color: rgba(255,255,255,0.7);
+            padding: 40px;
+            font-style: italic;
+            font-size: 18px;
         }
     </style>
 </head>
@@ -337,7 +318,7 @@
             <a href="admin_query.html"><img src="query.png" class="icon">Query Analyzer</a>
         </div>
 
-            <a href="landing_page.html" class="logout"><img src="logout.png" class="icon">Log Out</a>
+        <a href="landing_page.html" class="logout"><img src="logout.png" class="icon">Log Out</a>
 
         <!-- Profile Panel (Hidden by default) -->
         <div class="profile-panel">
@@ -352,47 +333,76 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <h1>Departments</h1>
+        <h1>Assets</h1>
 
         <div class="content-wrapper">
 
-            <!-- LEFT: Department Cards -->
-            <div class="department-list-panel">
-
-                <div class="department-header">
-                    <input type="text" class="search-bar" placeholder="Search">
-
-                    <select class="sort-dept-btn">
-                        <option>Ascending A–Z</option>
-                        <option>Descending Z–A</option>
-                        <option>Most Employees</option>
-                        <option>Least Employees</option>
-                    </select>
+            <!-- Assets Panel -->
+            <div class="assets-panel">
+                <div class="assets-header">
+                    <div class="header-controls">
+                        <input type="text" class="search-bar" id="searchBar" placeholder="Search" onkeyup="searchAssets()">
+                        <select class="sort-btn" id="sortSelect" onchange="sortAssets()">
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                            <option value="quantity-high">Quantity (High to Low)</option>
+                            <option value="quantity-low">Quantity (Low to High)</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="scroll-area">
-
-                    <div class="dept-card">
-                        <div class="dept-info">
-                            <b>Department:</b> IT<br>
-                            <b>Employees:</b> 10
-                        </div>
-                        <button class="dept-edit-btn">Edit</button>
+                <div class="scroll-area" id="assetsContainer">
+                    <!-- Sample Asset Cards -->
+                    <div class="asset-card">
+                        <div class="asset-name">DSLR Camera</div>
+                        <div class="asset-quantity">Quantity: 10</div>
                     </div>
 
+                    <div class="asset-card">
+                        <div class="asset-name">Tripod</div>
+                        <div class="asset-quantity">Quantity: 60</div>
+                    </div>
+
+                    <div class="asset-card">
+                        <div class="asset-name">Microphone</div>
+                        <div class="asset-quantity">Quantity: 150</div>
+                    </div>
+
+                    <div class="asset-card">
+                        <div class="asset-name">Diffuser Light</div>
+                        <div class="asset-quantity">Quantity: 20</div>
+                    </div>
+
+                    <div class="asset-card">
+                        <div class="asset-name">Laptop</div>
+                        <div class="asset-quantity">Quantity: 45</div>
+                    </div>
+
+                    <div class="asset-card">
+                        <div class="asset-name">Monitor</div>
+                        <div class="asset-quantity">Quantity: 80</div>
+                    </div>
+
+                    <div class="asset-card">
+                        <div class="asset-name">Keyboard</div>
+                        <div class="asset-quantity">Quantity: 100</div>
+                    </div>
+
+                    <div class="asset-card">
+                        <div class="asset-name">Mouse</div>
+                        <div class="asset-quantity">Quantity: 120</div>
+                    </div>
+
+                    <div class="asset-card">
+                        <div class="asset-name">Projector</div>
+                        <div class="asset-quantity">Quantity: 8</div>
+                    </div>
+
+                    <div class="asset-card">
+                        <div class="asset-name">External Hard Drive</div>
+                        <div class="asset-quantity">Quantity: 35</div>
+                    </div>
                 </div>
-
-            </div>
-
-            <!-- RIGHT: Add Department -->
-            <div class="add-department-panel">
-
-                <h2>Add Department</h2>
-
-                <label>Department Name:</label>
-                <input type="text">
-
-                <button class="add-btn">Add Department</button>
             </div>
 
         </div>
@@ -421,6 +431,52 @@
                 profileOpen = false;
             }
         });
+
+        // Search functionality
+        function searchAssets() {
+            const searchValue = document.getElementById('searchBar').value.toLowerCase();
+            const assetCards = document.querySelectorAll('.asset-card');
+            
+            assetCards.forEach(card => {
+                const assetName = card.querySelector('.asset-name').textContent.toLowerCase();
+                if (assetName.includes(searchValue)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Sort functionality
+        function sortAssets() {
+            const sortValue = document.getElementById('sortSelect').value;
+            const container = document.getElementById('assetsContainer');
+            const assetCards = Array.from(document.querySelectorAll('.asset-card'));
+            
+            assetCards.sort((a, b) => {
+                const nameA = a.querySelector('.asset-name').textContent;
+                const nameB = b.querySelector('.asset-name').textContent;
+                const qtyA = parseInt(a.querySelector('.asset-quantity').textContent.match(/\d+/)[0]);
+                const qtyB = parseInt(b.querySelector('.asset-quantity').textContent.match(/\d+/)[0]);
+                
+                switch(sortValue) {
+                    case 'name-asc':
+                        return nameA.localeCompare(nameB);
+                    case 'name-desc':
+                        return nameB.localeCompare(nameA);
+                    case 'quantity-high':
+                        return qtyB - qtyA;
+                    case 'quantity-low':
+                        return qtyA - qtyB;
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Clear and re-append sorted cards
+            container.innerHTML = '';
+            assetCards.forEach(card => container.appendChild(card));
+        }
     </script>
 
 </body>
