@@ -16,6 +16,7 @@
             overflow: hidden;
         }
 
+        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -31,8 +32,13 @@
             box-shadow: 2px 0 15px rgba(0,0,0,0.2);
             transition: width 0.3s ease;
             z-index: 100;
+            overflow-y: auto;
+            scrollbar-width: none; 
         }
 
+        .sidebar::-webkit-scrollbar {
+            display: none; 
+        }
         .sidebar.expanded {
             width: 350px;
         }
