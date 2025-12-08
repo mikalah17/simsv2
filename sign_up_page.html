@@ -100,24 +100,56 @@
 
     <h2>Create your account.</h2>
 
-    <label for="firstname"><b>First Name</b></label>
-    <input type="text" id="firstname" placeholder="Enter your first name">
+    <form id="signupForm" method="post" action="php/register.php">
+        <label for="firstname"><b>First Name</b></label>
+        <input type="text" id="firstname" name="first_name" placeholder="Enter your first name" required>
 
-    <label for="middlename"><b>Middle Name</b></label>
-    <input type="text" id="lastname" placeholder="Enter your middle name">
+        <label for="middlename"><b>Middle Name</b></label>
+        <input type="text" id="middlename" name="middle_name" placeholder="Enter your middle name">
 
-    <label for="lastname"><b>Last Name</b></label>
-    <input type="text" id="lastname" placeholder="Enter your last name">
+        <label for="lastname"><b>Last Name</b></label>
+        <input type="text" id="lastname" name="last_name" placeholder="Enter your last name" required>
 
-    <label for="email"><b>Email</b></label>
-    <input type="text" id="email" placeholder="Enter your email">
+        <label for="email"><b>Email</b></label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required>
 
-    <label for="password"><b>Password</b></label>
-    <input type="password" id="password" placeholder="Enter your password">
+        <label for="password"><b>Password</b></label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
-    <button class="btn" onclick="window.location.href='sign_in_page.html'">Create Account</button>
+        <label for="confirm"><b>Confirm Password</b></label>
+        <input type="password" id="confirm" name="confirm_password" placeholder="Confirm your password" required>
+
+        <button class="btn" type="submit">Create Account</button>
+    </form>
+        <div id="errorMsg" class="error-box" style="display:none; margin-bottom:10px;"></div>
     <a class="link" onclick="window.location.href='sign_in_page.html'">Already have an account? Sign in.</a>
 
+        <style>
+            .error-box { background: rgba(255,0,0,0.12); color: #ffd6d6; padding:10px; border-radius:8px; }
+            .error-box strong { color: #fff; }
+        </style>
+
+        <script>
+            // Show friendly messages based on query param `error`
+            (function(){
+                const params = new URLSearchParams(window.location.search);
+                const err = params.get('error');
+                const msgBox = document.getElementById('errorMsg');
+                if (!err) return;
+                let msg = '';
+                switch(err) {
+                    case 'missing': msg = 'Please fill in all fields.'; break;
+                    case 'invalid_email': msg = 'Please enter a valid email address.'; break;
+                    case 'password_mismatch': msg = 'Passwords do not match.'; break;
+                    case 'password_short': msg = 'Password must be at least 6 characters.'; break;
+                    case 'email_taken': msg = 'Email is already registered.'; break;
+                    case 'server': msg = 'Server error. Try again later.'; break;
+                    default: msg = 'An error occurred.';
+                }
+                msgBox.textContent = msg;
+                msgBox.style.display = 'block';
+            })();
+        </script>
 </div>
 
 </body>

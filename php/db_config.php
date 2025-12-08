@@ -2,9 +2,9 @@
 // Database configuration and PDO helper
 // Replace the placeholder values with your actual DB credentials
 $DB_HOST = '127.0.0.1';
-$DB_NAME = 'your_database';
-$DB_USER = 'your_db_user';
-$DB_PASS = 'your_db_password';
+$DB_NAME = 'sims';
+$DB_USER = 'root';
+$DB_PASS = 'groupCircuit';
 
 function getPDO()
 {
