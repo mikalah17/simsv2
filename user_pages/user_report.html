@@ -18,33 +18,7 @@
         }
 
         /* Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 220px;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
-            transition: width 0.3s ease;
-            z-index: 100;
-            overflow-y: auto;
-            scrollbar-width: none; 
-        }
-
-        .sidebar::-webkit-scrollbar {
-            display: none; 
-        }
-
-        .sidebar.expanded {
-            width: 350px;
-        }
-
+        <?php include __DIR__ . '/user_sidebar.php'; ?>
         .sidebar.expanded .logout {
             opacity: 0;
             pointer-events: none;
