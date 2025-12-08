@@ -123,11 +123,25 @@
     <a class="link" onclick="window.location.href='sign_up_page.html'">Don't have an account? Create one.</a>
 
     <script>
-        // Show friendly messages based on query param `error`
+        // Show friendly messages based on query param `error` or `success`
         (function(){
             const params = new URLSearchParams(window.location.search);
             const err = params.get('error');
+            const success = params.get('success');
             const msgBox = document.getElementById('errorMsg');
+            
+            if (success) {
+                let msg = '';
+                if (success === 'registered') {
+                    msg = 'Registration successful! You can now sign in.';
+                }
+                msgBox.textContent = msg;
+                msgBox.style.color = '#b4ffb4';
+                msgBox.style.background = 'rgba(0, 255, 0, 0.1)';
+                msgBox.style.display = 'block';
+                return;
+            }
+            
             if (!err) return;
             let msg = '';
             switch(err) {

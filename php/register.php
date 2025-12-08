@@ -51,13 +51,13 @@ try {
 
     // Insert new user matching SIMS schema (first_name, middle_name, last_name, email, password, role_type)
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $insert = $pdo->prepare('INSERT INTO users (first_name, middle_name, last_name, email, password, role_type) VALUES (:fn, :mn, :ln, :email, :hash, :role)');
+    $insert = $pdo->prepare('INSERT INTO users (first_name, middle_name, last_name, email, password, role_type) VALUES (:fn, :mn, :ln, :email, :pass, :role)');
     $insert->execute([
         ':fn' => $first_name,
         ':mn' => ($middle_name === '' ? null : $middle_name),
-':ln' => $last_name,
+        ':ln' => $last_name,
         ':email' => $email,
-        ':hash' => $hash,
+        ':pass' => $hash,
         ':role' => 'user'
     ]);
 

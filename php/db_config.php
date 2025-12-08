@@ -1,11 +1,11 @@
 <?php
 // Database configuration and PDO helper
 // Replace the placeholder values with your actual DB credentials
-$DB_HOST = '127.0.0.1';
+$DB_HOST = 'hayes-pizza-existence-federal.trycloudflare.com';
 $DB_NAME = 'sims';
-$DB_USER = 'root';
-$DB_PASS = '';
-$DB_PORT = 3306;
+$DB_USER = 'nacion.johnrain.carino1@gmail.com';
+$DB_PASS = 'quantum-Firewall2025';
+$DB_PORT = 3307; // Bytebase MySQL port
 
 function getPDO()
 {
@@ -30,11 +30,12 @@ function getPDO()
 
     $lastEx = null;
     foreach ($hostsToTry as $host) {
-        $dsn = "mysql:host={$host};port={$DB_PORT};dbname={$DB_NAME};charset=utf8mb4";
+        $dsn = "mysql:host={$host};port={$DB_PORT};dbname={$DB_NAME};charset=utf8mb4;connect_timeout=5";
         try {
             $pdo = new PDO($dsn, $DB_USER, $DB_PASS, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_TIMEOUT => 5,
             ]);
             return $pdo;
         } catch (PDOException $e) {
