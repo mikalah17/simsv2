@@ -21,24 +21,33 @@ if ($email === '' || $password === '') {
 
 try {
     $pdo = getPDO();
-    $stmt = $pdo->prepare('SELECT id, email, password_hash, first_name, last_name, role FROM users WHERE email = :email LIMIT 1');
+    // Adjusted to match `users` table from SIMS db.sql: columns are user_id, first_name, last_name, email, password, role_type
+    $stmt = $pdo->prepare('SELECT user_id, first_name, middle_name, last_name, email, password, role_type FROM users WHERE email = :email LIMIT 1');
     $stmt->execute([':email' => $email]);
     $user = $stmt->fetch();
 
-    if ($user && isset($user['password_hash']) && password_verify($password, $user['password_hash'])) {
+    if ($user && isset($user['password']) && password_verify($password, $user['password'])) {
         // Successful login
         session_regenerate_id(true);
-        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_id'] = $user['user_id'];
         $_SESSION['email'] = $user['email'];
-        $_SESSION['name'] = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
-        $_SESSION['role'] = $user['role'] ?? 'user';
+        $_SESSION['first_name'] = $user['first_name'] ?? '';
+        $_SESSION['middle_name'] = $user['middle_name'] ?? '';
+        $_SESSION['last_name'] = $user['last_name'] ?? '';
+        // Build a readable name including middle name when present
+        $parts = array_filter([$_SESSION['first_name'], $_SESSION['middle_name'], $_SESSION['last_name']], function($v){ return $v !== ''; });
+        $_SESSION['name'] = trim(implode(' ', $parts));
+        // keep role_type name consistent with DB
+        $_SESSION['role_type'] = $user['role_type'] ?? 'user';
+        // also set legacy 'role' key for compatibility
+        $_SESSION['role'] = $_SESSION['role_type'];
         $_SESSION['logged_in'] = true;
 
-        // Redirect based on role (customize names as needed)
-        if (strtolower($_SESSION['role']) === 'admin') {
-            header('Location: ../admin_pages/admin_dashboard.html');
+        // Redirect based on role_type
+        if (strtolower($_SESSION['role_type']) === 'admin') {
+            header('Location: ../admin_pages/admin_dashboard.php');
         } else {
-            header('Location: ../user_pages/user_dashboard.html');
+            header('Location: ../user_pages/user_dashboard.php');
         }
         exit;
     } else {

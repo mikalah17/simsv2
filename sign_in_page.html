@@ -108,14 +108,40 @@
 
     <h2>Sign-in to your account.</h2>
 
-    <label for="email"><b>Email</b></label>
-    <input type="text" id="email" placeholder="Enter your email">
+    <div id="errorMsg" style="color: #ffd6d6; background: rgba(255,0,0,0.12); padding:10px; border-radius:8px; display:none; margin-bottom:10px;"></div>
 
-    <label for="password"><b>Password</b></label>
-    <input type="password" id="password" placeholder="Enter your password">
+    <form method="post" action="php/login.php" id="signinForm">
+        <label for="email"><b>Email</b></label>
+        <input type="email" id="email" placeholder="Enter your email" name="email" required autofocus>
 
-    <button class="btn">Sign-in</button>
+        <label for="password"><b>Password</b></label>
+        <input type="password" id="password" placeholder="Enter your password" name="password" required>
+
+        <button class="btn" type="submit">Sign-in</button>
+    </form>
+
     <a class="link" onclick="window.location.href='sign_up_page.html'">Don't have an account? Create one.</a>
+
+    <script>
+        // Show friendly messages based on query param `error`
+        (function(){
+            const params = new URLSearchParams(window.location.search);
+            const err = params.get('error');
+            const msgBox = document.getElementById('errorMsg');
+            if (!err) return;
+            let msg = '';
+            switch(err) {
+                case 'missing': msg = 'Please fill in both email and password.'; break;
+                case 'invalid': msg = 'Invalid email or password.'; break;
+                case 'server': msg = 'Server error. Try again later.'; break;
+                case 'auth': msg = 'Please sign in to continue.'; break;
+                case 'forbidden': msg = 'You are not authorized to access that page.'; break;
+                default: msg = 'An error occurred.';
+            }
+            msgBox.textContent = msg;
+            msgBox.style.display = 'block';
+        })();
+    </script>
 
 
 

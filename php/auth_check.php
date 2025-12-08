@@ -19,7 +19,14 @@ function require_login($requiredRole = null)
     }
 
     if ($requiredRole !== null) {
-        $role = isset($_SESSION['role']) ? strtolower($_SESSION['role']) : '';
+        // support both `role_type` (DB) and legacy `role`
+        $role = '';
+        if (!empty($_SESSION['role_type'])) {
+            $role = strtolower($_SESSION['role_type']);
+        } elseif (!empty($_SESSION['role'])) {
+            $role = strtolower($_SESSION['role']);
+        }
+
         if (strtolower($requiredRole) !== $role) {
             // Optionally you can redirect to a "not authorized" page
             header('Location: ../sign_in_page.html?error=forbidden');
