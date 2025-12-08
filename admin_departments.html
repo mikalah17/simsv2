@@ -273,18 +273,25 @@
             font-weight: bold;
         }
 
-        /* RIGHT PANEL — Add Department */
+        /* RIGHT PANEL — Add/Edit Department */
         .add-department-panel {
             flex: 1;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
             padding: 25px;
+            border-radius: 18px;
             color: white;
             text-align: center;
+        }
+
+        .add-department-panel h2 {
+            margin-top: 0;
         }
 
         .add-department-panel label {
             display: block;
             text-align: left;
-            margin-left: 15px;
+            margin-left: 5px;
             margin-bottom: 5px;
             font-weight: 600;
         }
@@ -301,9 +308,9 @@
         }
 
         .add-btn {
-            width: 60%;
-            padding: 10px 15px;
-            border-radius: 15px;
+            width: 80%;
+            padding: 12px 20px;
+            border-radius: 25px;
             background: #0F1B65;
             border: none;
             color: white;
@@ -312,10 +319,52 @@
             display: block;
             margin: 10px auto 0 auto;
             font-family: 'DM Sans', Arial, sans-serif;
+            font-size: 16px;
         }
 
         .add-btn:hover {
             background: #162897;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .delete-btn, .save-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'DM Sans', Arial, sans-serif;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .delete-btn {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #b71c1c;
+        }
+
+        .save-btn {
+            background: #0F1B65;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #162897;
+        }
+
+        /* Hide/Show panels */
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -375,24 +424,70 @@
                     <div class="dept-card">
                         <div class="dept-info">
                             <b>Department:</b> IT<br>
-                            <b>Employees:</b> 10
+                            <b>Number of Employees:</b> 10
                         </div>
-                        <button class="dept-edit-btn">Edit</button>
+                        <button class="dept-edit-btn" onclick="openEditMode('IT', 10)">Edit</button>
+                    </div>
+
+                    <div class="dept-card">
+                        <div class="dept-info">
+                            <b>Department:</b> HR<br>
+                            <b>Number of Employees:</b> 8
+                        </div>
+                        <button class="dept-edit-btn" onclick="openEditMode('HR', 8)">Edit</button>
+                    </div>
+
+                    <div class="dept-card">
+                        <div class="dept-info">
+                            <b>Department:</b> Finance<br>
+                            <b>Number of Employees:</b> 12
+                        </div>
+                        <button class="dept-edit-btn" onclick="openEditMode('Finance', 12)">Edit</button>
+                    </div>
+
+                    <div class="dept-card">
+                        <div class="dept-info">
+                            <b>Department:</b> Admin<br>
+                            <b>Number of Employees:</b> 5
+                        </div>
+                        <button class="dept-edit-btn" onclick="openEditMode('Admin', 5)">Edit</button>
+                    </div>
+
+                    <div class="dept-card">
+                        <div class="dept-info">
+                            <b>Department:</b> Maintenance<br>
+                            <b>Number of Employees:</b> 6
+                        </div>
+                        <button class="dept-edit-btn" onclick="openEditMode('Maintenance', 6)">Edit</button>
                     </div>
 
                 </div>
 
             </div>
 
-            <!-- RIGHT: Add Department -->
-            <div class="add-department-panel">
+            <!-- RIGHT: Add Department Panel -->
+            <div class="add-department-panel" id="addPanel">
 
                 <h2>Add Department</h2>
 
                 <label>Department Name:</label>
-                <input type="text">
+                <input type="text" id="addDeptName">
 
                 <button class="add-btn">Add Department</button>
+            </div>
+
+            <!-- RIGHT: Edit Department Panel (Hidden by default) -->
+            <div class="add-department-panel hidden" id="editPanel">
+
+                <h2>Edit a Department</h2>
+
+                <label>Department Name:</label>
+                <input type="text" id="editDeptName">
+
+                <div class="action-buttons">
+                    <button class="delete-btn" onclick="deleteDepartment()">Delete</button>
+                    <button class="save-btn" onclick="saveDepartment()">Save</button>
+                </div>
             </div>
 
         </div>
@@ -400,6 +495,8 @@
 
     <script>
         const sidebar = document.getElementById('sidebar');
+        const addPanel = document.getElementById('addPanel');
+        const editPanel = document.getElementById('editPanel');
         let profileOpen = false;
 
         // Toggle Profile Panel
@@ -411,6 +508,34 @@
                 sidebar.classList.add('expanded');
             } else {
                 sidebar.classList.remove('expanded');
+            }
+        }
+
+        // Open Edit Mode - Replace Add panel with Edit panel
+        function openEditMode(deptName, numEmployees) {
+            document.getElementById('editDeptName').value = deptName;
+            
+            addPanel.classList.add('hidden');
+            editPanel.classList.remove('hidden');
+        }
+
+        // Save Department - Return to Add panel
+        function saveDepartment() {
+            const deptName = document.getElementById('editDeptName').value;
+            
+            alert(`Saved: ${deptName}`);
+            
+            editPanel.classList.add('hidden');
+            addPanel.classList.remove('hidden');
+        }
+
+        // Delete Department - Return to Add panel
+        function deleteDepartment() {
+            if (confirm('Are you sure you want to delete this department?')) {
+                alert('Department deleted');
+                
+                editPanel.classList.add('hidden');
+                addPanel.classList.remove('hidden');
             }
         }
 
