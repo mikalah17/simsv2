@@ -44,9 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             throw new Exception('Asset not found');
         }
         
+        // Get the next request_id
+        $maxStmt = $pdo->query("SELECT MAX(request_id) as max_id FROM request");
+        $maxResult = $maxStmt->fetch(PDO::FETCH_ASSOC);
+        $nextId = ($maxResult['max_id'] ?? 0) + 1;
+        
         // Insert request
-        $pdo->prepare('INSERT INTO request (asset_id, quantity_requested, employee_id, request_date) VALUES (?, ?, ?, ?)')
-            ->execute([$asset_id, $quantity, $employee_id, $request_date]);
+        $pdo->prepare('INSERT INTO request (request_id, asset_id, quantity_requested, employee_id, request_date) VALUES (?, ?, ?, ?, ?)')
+            ->execute([$nextId, $asset_id, $quantity, $employee_id, $request_date]);
         
         $message = 'Request logged successfully!';
         $message_type = 'success';

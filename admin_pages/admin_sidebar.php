@@ -15,8 +15,8 @@ $email = isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'ema
     <div class="nav-links">
         <a href="#" onclick="toggleProfile(event)"><img src="../image/profile.png" class="icon">Profile</a>
         <a href="admin_dashboard.php"><img src="../image/user_dashboard.png" class="icon">Dashboard</a>
-        <a href="admin_employees.php"><img src="../image/employees.png" class="icon">Employees</a>
         <a href="admin_departments.php"><img src="../image/departments.png" class="icon">Departments</a>
+        <a href="admin_employees.php"><img src="../image/employees.png" class="icon">Employees</a>
         <a href="admin_assets.php"><img src="../image/assets.png" class="icon">Assets</a>
         <a href="admin_request.php"><img src="../image/requests.png" class="icon">Request Log</a>
         <a href="admin_audit.php"><img src="../image/audit.png" class="icon">Audit</a>

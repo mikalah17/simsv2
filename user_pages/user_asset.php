@@ -21,8 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('Invalid asset name or quantity');
                 }
                 
-                $pdo->prepare('INSERT INTO asset (asset_name, asset_quantity) VALUES (?, ?)')
-                    ->execute([$name, $quantity]);
+                // Get next asset_id
+                $result = $pdo->query('SELECT MAX(asset_id) AS maxId FROM asset');
+                $row = $result->fetch(PDO::FETCH_ASSOC);
+                $nextId = ($row && isset($row['maxId'])) ? (int)$row['maxId'] + 1 : 1;
+                
+                $pdo->prepare('INSERT INTO asset (asset_id, asset_name, asset_quantity) VALUES (?, ?, ?)')
+                    ->execute([$nextId, $name, $quantity]);
                 $message = 'Asset added successfully!';
                 $message_type = 'success';
             }
