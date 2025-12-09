@@ -1,8 +1,6 @@
 <?php
 // auth_check.php - helper functions to protect pages
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
 
 function is_logged_in()
 {
