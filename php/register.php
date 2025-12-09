@@ -58,9 +58,9 @@ try {
         $nextId = 1;
     }
 
-    // Insert new user matching SIMS schema (user_id, first_name, middle_name, last_name, email, password, role_type)
+    // Insert new user matching SIMS schema (user_id, first_name, middle_name, last_name, email, password_hash, role_type)
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $insert = $pdo->prepare('INSERT INTO users (user_id, first_name, middle_name, last_name, email, password, role_type) VALUES (:id, :fn, :mn, :ln, :email, :hash, :role)');
+    $insert = $pdo->prepare('INSERT INTO users (user_id, first_name, middle_name, last_name, email, password_hash, role_type) VALUES (:id, :fn, :mn, :ln, :email, :hash, :role)');
     $insert->execute([
         ':id' => $nextId,
         ':fn' => $first_name,

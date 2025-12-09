@@ -245,6 +245,32 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             height: 20px;
         }
 
+        .profile-back {
+            margin-top: auto;
+            margin-bottom: 20px;
+            padding: 12px 30px;
+            background: rgba(15, 27, 101, 0.67);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .profile-back:hover {
+            background: rgba(15, 27, 101, 0.85);
+        }
+
+        .profile-back img {
+            width: 20px;
+            height: 20px;
+        }
+
         /* Main content */
         .main-content {
             margin-left: 220px;
