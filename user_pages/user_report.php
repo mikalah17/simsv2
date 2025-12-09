@@ -24,7 +24,7 @@ try {
         FROM request
     ')->fetch(PDO::FETCH_ASSOC);
     
-    // Get department statistics
+    // Get department statistics for line chart
     $deptStats = $pdo->query('
         SELECT 
             d.department_name,
@@ -37,7 +37,7 @@ try {
         ORDER BY request_count DESC
     ')->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get top requested assets
+    // Get top requested assets for pie chart
     $topAssets = $pdo->query('
         SELECT 
             a.asset_id,
@@ -49,24 +49,22 @@ try {
         LEFT JOIN request r ON a.asset_id = r.asset_id
         GROUP BY a.asset_id, a.asset_name, a.asset_quantity
         ORDER BY total_quantity_requested DESC
-        LIMIT 10
+        LIMIT 5
     ')->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get recent activity
-    $recentActivity = $pdo->query('
+    // Get weekly request data for line chart
+    $weeklyData = $pdo->query('
         SELECT 
-            r.request_id,
-            a.asset_name,
-            r.quantity_requested,
-            CONCAT(e.employee_fname, " ", e.employee_lname) as employee_name,
+            DAYNAME(r.request_date) as day_name,
+            DAYOFWEEK(r.request_date) as day_num,
             d.department_name,
-            r.request_date
+            COUNT(r.request_id) as request_count
         FROM request r
-        JOIN asset a ON r.asset_id = a.asset_id
         JOIN employee e ON r.employee_id = e.employee_id
         LEFT JOIN dept d ON e.department_id = d.department_id
-        ORDER BY r.request_date DESC
-        LIMIT 20
+        WHERE r.request_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        GROUP BY day_name, day_num, d.department_name
+        ORDER BY day_num, d.department_name
     ')->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (Exception $e) {
@@ -75,7 +73,25 @@ try {
     $requestStats = [];
     $deptStats = [];
     $topAssets = [];
-    $recentActivity = [];
+    $weeklyData = [];
+}
+
+// Prepare data for JavaScript
+$deptNames = array_column($deptStats, 'department_name');
+$deptCounts = array_column($deptStats, 'request_count');
+
+$assetNames = array_column($topAssets, 'asset_name');
+$assetQuantities = array_column($topAssets, 'total_quantity_requested');
+
+// Organize weekly data by department
+$weeklyByDept = [];
+foreach ($weeklyData as $row) {
+    $dept = $row['department_name'] ?? 'Unassigned';
+    if (!isset($weeklyByDept[$dept])) {
+        $weeklyByDept[$dept] = array_fill(0, 7, 0);
+    }
+    $dayIndex = $row['day_num'] - 1; // Sunday = 0, Saturday = 6
+    $weeklyByDept[$dept][$dayIndex] = intval($row['request_count']);
 }
 ?>
 <!DOCTYPE html>
@@ -84,28 +100,22 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        html {
+        html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #1a1a2e;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            min-height: 100vh;
             font-family: 'DM Sans', Arial, sans-serif;
             background-image: url("../image/sims_bg.png");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background-attachment: fixed;
+            overflow: hidden;
         }
 
+        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -122,11 +132,11 @@ try {
             transition: width 0.3s ease;
             z-index: 100;
             overflow-y: auto;
-            scrollbar-width: none;
+            scrollbar-width: none; 
         }
 
         .sidebar::-webkit-scrollbar {
-            display: none;
+            display: none; 
         }
 
         .sidebar.expanded {
@@ -138,131 +148,9 @@ try {
             pointer-events: none;
         }
 
-        .sidebar.expanded .nav-links {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .sidebar.expanded .logo {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .sidebar.expanded .profile-panel {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .main-content {
-            margin-left: 220px;
-            padding: 40px;
-            min-height: 100vh;
-            box-sizing: border-box;
-            padding-bottom: 80px;
-            overflow-y: auto;
-            transition: margin-left 0.3s ease;
-        }
-
-        .sidebar.expanded ~ .main-content {
-            margin-left: 350px;
-        }
-
-        .main-content h1 {
-            color: white;
-            margin-top: 0;
-            margin-bottom: 30px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            color: white;
-            text-align: center;
-        }
-
-        .stat-card h3 {
-            margin: 0 0 15px 0;
-            font-size: 14px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.8);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: white;
-            margin: 0;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .card h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: white;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .table thead {
-            background: rgba(15, 27, 101, 0.2);
-        }
-
-        .table th {
-            padding: 12px;
-            text-align: left;
-            color: white;
-            font-weight: 600;
-            border-bottom: 2px solid rgba(255,255,255,0.2);
-        }
-
-        .table td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .table tbody tr:hover {
-            background: rgba(255,255,255,0.05);
-        }
-
-        .progress-bar {
-            background: rgba(255,255,255,0.1);
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00d4ff, #0f1b65);
-            transition: width 0.3s ease;
+        .sidebar .logo {
+            width: 250px;
+            margin-bottom: 10px;
         }
 
         .nav-links {
@@ -270,6 +158,12 @@ try {
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .nav-links {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .sidebar a {
@@ -287,12 +181,6 @@ try {
             box-sizing: border-box;
         }
 
-        .sidebar a .icon {
-            width: 30px;
-            height: 30px;
-            margin-right: 12px;
-        }
-
         .sidebar a:hover {
             background: rgba(15, 27, 101, 0.67);
         }
@@ -301,11 +189,16 @@ try {
             background: rgba(15, 27, 101, 0.8);
         }
 
+        .sidebar a .icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 12px;
+        }
+
         .sidebar a.logout {
             margin-top: auto;
             margin-bottom: 40px;
             background: rgba(15, 27, 101, 0.67);
-            width: 90%;
             justify-content: center;
         }
 
@@ -313,11 +206,7 @@ try {
             background: rgba(15, 27, 101, 0.85);
         }
 
-        .sidebar .logo {
-            width: 250px;
-            margin-bottom: 10px;
-        }
-
+        /* Profile Panel */
         .profile-panel {
             position: absolute;
             top: 120px;
@@ -333,6 +222,11 @@ try {
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease 0.1s;
+        }
+
+        .sidebar.expanded .profile-panel {
+            opacity: 1;
+            pointer-events: all;
         }
 
         .profile-name {
@@ -352,7 +246,7 @@ try {
         }
 
         .profile-logout {
-            margin-top: 20px;
+            margin-top: auto;
             margin-bottom: 20px;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
@@ -377,145 +271,175 @@ try {
             height: 20px;
         }
 
-        .profile-back {
-            margin-top: auto;
-            margin-bottom: 0;
-            padding: 12px 30px;
-            background: rgba(15, 27, 101, 0.67);
+        /* Main content */
+        .main-content {
+            margin-left: 220px;
+            padding: 40px;
+            height: 100vh;
+            box-sizing: border-box;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.expanded ~ .main-content {
+            margin-left: 350px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .main-content h1 {
             color: white;
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .generate-btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            background: rgba(15, 27, 101, 0.8);
             border: none;
-            border-radius: 10px;
+            color: white;
             font-weight: 700;
             font-size: 16px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
             transition: 0.3s;
         }
 
-        .profile-back:hover {
-            background: rgba(15, 27, 101, 0.85);
+        .generate-btn:hover {
+            background: rgba(15, 27, 101, 1);
         }
 
-        .profile-back img {
-            width: 20px;
-            height: 20px;
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            height: calc(100vh - 140px);
+        }
+
+        .chart-panel {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(8px);
+            padding: 25px;
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .time-filter, .dept-filter {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: rgba(100, 120, 200, 0.2);
+            border: none;
+            font-weight: 700;
+            color: #0F1B65;
+            font-size: 14px;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .legend {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #0F1B65;
+            font-weight: 600;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
         }
     </style>
 </head>
+
 <body>
 
     <?php include __DIR__ . '/user_sidebar.php'; ?>
 
+    <!-- Main Content -->
     <div class="main-content">
-        <h1>Reports & Analytics</h1>
-
-        <!-- Key Statistics -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Assets</h3>
-                <p class="stat-value"><?php echo intval($assetStats['total_assets'] ?? 0); ?></p>
-            </div>
-            <div class="stat-card">
-                <h3>Total Quantity</h3>
-                <p class="stat-value"><?php echo intval($assetStats['total_quantity'] ?? 0); ?></p>
-            </div>
-            <div class="stat-card">
-                <h3>Total Requests</h3>
-                <p class="stat-value"><?php echo intval($requestStats['total_requests'] ?? 0); ?></p>
-            </div>
-            <div class="stat-card">
-                <h3>Quantity Requested</h3>
-                <p class="stat-value"><?php echo intval($requestStats['total_quantity_requested'] ?? 0); ?></p>
-            </div>
+        <div class="header-section">
+            <h1>Reports</h1>
+            <button class="generate-btn" onclick="window.print()">Generate Report</button>
         </div>
 
-        <!-- Top Requested Assets -->
-        <div class="card">
-            <h2>Top Requested Assets</h2>
-            <?php if (!empty($topAssets)): ?>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Asset Name</th>
-                            <th>Request Count</th>
-                            <th>Total Quantity Requested</th>
-                            <th>Current Stock</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($topAssets as $asset): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($asset['asset_name']); ?></td>
-                                <td><?php echo intval($asset['request_count']); ?></td>
-                                <td><?php echo intval($asset['total_quantity_requested'] ?? 0); ?></td>
-                                <td><?php echo intval($asset['current_quantity']); ?> units</td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p style="color: #999; text-align: center; padding: 20px;">No data available</p>
-            <?php endif; ?>
-        </div>
+        <div class="charts-container">
+            <!-- Line Chart Panel -->
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <select class="time-filter" onchange="updateTimeRange(this.value)">
+                        <option value="7">Last 7 days</option>
+                        <option value="14">Last 14 days</option>
+                        <option value="30">Last 30 days</option>
+                        <option value="90">Last 3 months</option>
+                        <option value="180">Last 6 months</option>
+                        <option value="365">Last year</option>
+                    </select>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="legend" id="lineLegend">
+                    <?php 
+                    $colors = ['#4472C4', '#FFC000', '#FF0000', '#FF00FF', '#00B050', '#7030A0'];
+                    $i = 0;
+                    foreach ($deptStats as $dept): 
+                        $color = $colors[$i % count($colors)];
+                    ?>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: <?php echo $color; ?>;"></div>
+                            <span><?php echo htmlspecialchars($dept['department_name'] ?? 'Unassigned'); ?></span>
+                        </div>
+                    <?php 
+                        $i++;
+                    endforeach; 
+                    ?>
+                </div>
+            </div>
 
-        <!-- Department Statistics -->
-        <div class="card">
-            <h2>Department Activity</h2>
-            <?php if (!empty($deptStats)): ?>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Department</th>
-                            <th>Request Count</th>
-                            <th>Total Quantity Requested</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <!-- Pie Chart Panel -->
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <select class="dept-filter" onchange="updatePieChart(this.value)">
+                        <option value="all">All Departments - Top Assets</option>
                         <?php foreach ($deptStats as $dept): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($dept['department_name'] ?? 'Unassigned'); ?></td>
-                                <td><?php echo intval($dept['request_count']); ?></td>
-                                <td><?php echo intval($dept['quantity_requested'] ?? 0); ?></td>
-                            </tr>
+                            <option value="<?php echo htmlspecialchars($dept['department_name']); ?>">
+                                <?php echo htmlspecialchars($dept['department_name'] ?? 'Unassigned'); ?>
+                            </option>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p style="color: #999; text-align: center; padding: 20px;">No data available</p>
-            <?php endif; ?>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="card">
-            <h2>Recent Requests (Last 20)</h2>
-            <?php if (!empty($recentActivity)): ?>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Asset</th>
-                            <th>Quantity</th>
-                            <th>Employee</th>
-                            <th>Department</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($recentActivity as $activity): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($activity['request_date']); ?></td>
-                                <td><?php echo htmlspecialchars($activity['asset_name']); ?></td>
-                                <td><?php echo intval($activity['quantity_requested']); ?></td>
-                                <td><?php echo htmlspecialchars($activity['employee_name']); ?></td>
-                                <td><?php echo htmlspecialchars($activity['department_name'] ?? 'N/A'); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p style="color: #999; text-align: center; padding: 20px;">No recent activity</p>
-            <?php endif; ?>
+                    </select>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -526,7 +450,7 @@ try {
         function toggleProfile(event) {
             event.preventDefault();
             profileOpen = !profileOpen;
-            
+
             if (profileOpen) {
                 sidebar.classList.add('expanded');
             } else {
@@ -540,6 +464,101 @@ try {
                 profileOpen = false;
             }
         });
+
+        // Prepare data from PHP
+        const weeklyByDept = <?php echo json_encode($weeklyByDept); ?>;
+        const assetNames = <?php echo json_encode($assetNames); ?>;
+        const assetQuantities = <?php echo json_encode($assetQuantities); ?>;
+        
+        const colors = ['#4472C4', '#FFC000', '#FF0000', '#FF00FF', '#00B050', '#7030A0'];
+        
+        // Prepare datasets for line chart
+        const datasets = [];
+        let colorIndex = 0;
+        for (const [dept, data] of Object.entries(weeklyByDept)) {
+            datasets.push({
+                label: dept,
+                data: data,
+                borderColor: colors[colorIndex % colors.length],
+                backgroundColor: colors[colorIndex % colors.length],
+                tension: 0.4
+            });
+            colorIndex++;
+        }
+
+        // Line Chart
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        const lineChart = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                datasets: datasets.length > 0 ? datasets : [
+                    {
+                        label: 'No Data',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        borderColor: '#CCCCCC',
+                        backgroundColor: '#CCCCCC',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 10 }
+                    }
+                }
+            }
+        });
+
+        // Pie Chart
+        const pieColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#A8E6CF', '#F38181', '#AA96DA'];
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: assetNames.length > 0 ? assetNames : ['No Data'],
+                datasets: [{
+                    data: assetQuantities.length > 0 ? assetQuantities : [1],
+                    backgroundColor: pieColors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold',
+                                family: 'DM Sans'
+                            },
+                            color: '#0F1B65',
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+
+        function updateTimeRange(days) {
+            // In a real implementation, this would fetch new data from the server
+            alert('Time range updated to last ' + days + ' days. Refresh the page to see updated data.');
+        }
+
+        function updatePieChart(dept) {
+            // In a real implementation, this would fetch department-specific asset data
+            alert('Showing data for: ' + dept);
+        }
     </script>
 
 </body>

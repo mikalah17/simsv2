@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $pdo->prepare('INSERT INTO request (asset_id, quantity_requested, employee_id, request_date) VALUES (?, ?, ?, ?)')
             ->execute([$asset_id, $quantity, $employee_id, $request_date]);
         
-        $message = 'Request submitted successfully!';
+        $message = 'Request logged successfully!';
         $message_type = 'success';
     } catch (Exception $e) {
         $message = 'Error: ' . $e->getMessage();
@@ -81,27 +81,20 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        html {
+        html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #1a1a2e;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            min-height: 100vh;
             font-family: 'DM Sans', Arial, sans-serif;
             background-image: url("../image/sims_bg.png");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background-attachment: fixed;
+            overflow: hidden;
         }
 
+        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -118,176 +111,20 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             transition: width 0.3s ease;
             z-index: 100;
             overflow-y: auto;
-            scrollbar-width: none;
+            scrollbar-width: none; 
         }
 
         .sidebar::-webkit-scrollbar {
-            display: none;
+            display: none; 
         }
 
         .sidebar.expanded {
             width: 350px;
         }
 
-        .sidebar.expanded .logout {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .sidebar.expanded .nav-links {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .sidebar.expanded .logo {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .sidebar.expanded .profile-panel {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .main-content {
-            margin-left: 220px;
-            padding: 40px;
-            min-height: 100vh;
-            box-sizing: border-box;
-            padding-bottom: 80px;
-            overflow-y: auto;
-            transition: margin-left 0.3s ease;
-        }
-
-        .sidebar.expanded ~ .main-content {
-            margin-left: 350px;
-        }
-
-        .main-content h1 {
-            color: white;
-            margin-top: 0;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .card h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: white;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: white;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 8px;
-            background: rgba(255,255,255,0.9);
-            color: #0F1B65;
-            box-sizing: border-box;
-            font-family: 'DM Sans', Arial, sans-serif;
-            font-size: 14px;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #0F1B65;
-            background: white;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: 'DM Sans', Arial, sans-serif;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-        .btn-primary {
-            background: rgba(15, 27, 101, 0.8);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: rgba(15, 27, 101, 1);
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .message.success {
-            background: rgba(40, 167, 69, 0.3);
-            color: #98fb98;
-            border: 1px solid rgba(40, 167, 69, 0.5);
-        }
-
-        .message.error {
-            background: rgba(220, 53, 69, 0.3);
-            color: #ff6b6b;
-            border: 1px solid rgba(220, 53, 69, 0.5);
-        }
-
-        .requests-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .requests-table thead {
-            background: rgba(15, 27, 101, 0.2);
-        }
-
-        .requests-table th {
-            padding: 12px;
-            text-align: left;
-            color: white;
-            font-weight: 600;
-            border-bottom: 2px solid rgba(255,255,255,0.2);
-        }
-
-        .requests-table td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .requests-table tbody tr:hover {
-            background: rgba(255,255,255,0.05);
+        .sidebar .logo {
+            width: 250px;
+            margin-bottom: 10px;
         }
 
         .nav-links {
@@ -295,6 +132,12 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .nav-links {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .sidebar a {
@@ -312,12 +155,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             box-sizing: border-box;
         }
 
-        .sidebar a .icon {
-            width: 30px;
-            height: 30px;
-            margin-right: 12px;
-        }
-
         .sidebar a:hover {
             background: rgba(15, 27, 101, 0.67);
         }
@@ -326,11 +163,16 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background: rgba(15, 27, 101, 0.8);
         }
 
+        .sidebar a .icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 12px;
+        }
+
         .sidebar a.logout {
             margin-top: auto;
             margin-bottom: 40px;
             background: rgba(15, 27, 101, 0.67);
-            width: 90%;
             justify-content: center;
         }
 
@@ -338,11 +180,7 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background: rgba(15, 27, 101, 0.85);
         }
 
-        .sidebar .logo {
-            width: 250px;
-            margin-bottom: 10px;
-        }
-
+        /* Profile Panel */
         .profile-panel {
             position: absolute;
             top: 120px;
@@ -358,6 +196,11 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease 0.1s;
+        }
+
+        .sidebar.expanded .profile-panel {
+            opacity: 1;
+            pointer-events: all;
         }
 
         .profile-name {
@@ -377,7 +220,7 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .profile-logout {
-            margin-top: 20px;
+            margin-top: auto;
             margin-bottom: 20px;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
@@ -402,39 +245,184 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             height: 20px;
         }
 
-        .profile-back {
-            margin-top: auto;
-            margin-bottom: 0;
-            padding: 12px 30px;
-            background: rgba(15, 27, 101, 0.67);
+        /* Main content */
+        .main-content {
+            margin-left: 220px;
+            padding: 40px;
+            height: 100vh;
+            box-sizing: border-box;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.expanded ~ .main-content {
+            margin-left: 350px;
+        }
+
+        .main-content h1 {
             color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
+            margin: 0 0 25px 0;
+            font-size: 36px;
+        }
+
+        /* Message alerts */
+        .message {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            min-width: 300px;
+        }
+
+        .message.success {
+            background: rgba(40, 167, 69, 0.95);
+            color: white;
+            border: 1px solid rgba(40, 167, 69, 1);
+        }
+
+        .message.error {
+            background: rgba(220, 53, 69, 0.95);
+            color: white;
+            border: 1px solid rgba(220, 53, 69, 1);
+        }
+
+        /* Layout */
+        .content-wrapper {
             display: flex;
+            gap: 25px;
+            height: calc(100vh - 120px);
+        }
+
+        /* LEFT PANEL */
+        .request-panel {
+            flex: 2;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            padding: 25px;
+            border-radius: 18px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            transition: 0.3s;
+            margin-bottom: 15px;
         }
 
-        .profile-back:hover {
-            background: rgba(15, 27, 101, 0.85);
+        .search-bar {
+            width: 200px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
         }
 
-        .profile-back img {
-            width: 20px;
-            height: 20px;
+        .sort-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: #0F1B65;
+            appearance: none;
+        }
+
+        .scroll-area {
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
+        }
+
+        .inner-card {
+            background: rgba(255,255,255,0.85);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            color: #0F1B65;
+            box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            flex: 1;
+            padding: 25px;
+            color: white;
+            text-align: center;
+        }
+
+        .right-panel h2 {
+            margin-bottom: 30px;
+        }
+
+        .right-panel label {
+            display: block;
+            text-align: left;
+            margin-left: 15px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .right-panel input,
+        .right-panel select {
+            width: 92%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 18px;
+            outline: none;
+            font-family: 'DM Sans', Arial, sans-serif;
+        }
+
+        .log-btn {
+            width: 60%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            background: #0F1B65;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 10px auto 0 auto;
+            font-family: 'DM Sans', Arial, sans-serif;
+        }
+
+        .log-btn:hover {
+            background: #162897;
         }
     </style>
 </head>
+
 <body>
 
     <?php include __DIR__ . '/user_sidebar.php'; ?>
 
+    <!-- Main Content -->
     <div class="main-content">
-        <h1>Asset Requests</h1>
+        <h1>Request Log</h1>
 
         <?php if ($message): ?>
             <div class="message <?php echo $message_type; ?>">
@@ -442,14 +430,66 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         <?php endif; ?>
 
-        <!-- Submit New Request Form -->
-        <div class="card">
-            <h2>Submit New Request</h2>
-            <form method="POST">
-                <div class="form-group">
-                    <label for="asset_id">Asset:</label>
-                    <select id="asset_id" name="asset_id" required>
-                        <option value="">-- Select an Asset --</option>
+        <div class="content-wrapper">
+
+            <!-- LEFT side - Request History -->
+            <div class="request-panel">
+
+                <div class="request-header">
+                    <input type="text" class="search-bar" id="searchInput" placeholder="Search">
+
+                    <select class="sort-btn" id="sortSelect">
+                        <option value="date-desc">Newest First</option>
+                        <option value="date-asc">Oldest First</option>
+                        <option value="name-asc">Name A-Z</option>
+                        <option value="name-desc">Name Z-A</option>
+                        <option value="qty-asc">Quantity Low-High</option>
+                        <option value="qty-desc">Quantity High-Low</option>
+                    </select>
+                </div>
+
+                <div class="scroll-area" id="requestsList">
+                    <?php if (!empty($requests)): ?>
+                        <?php foreach ($requests as $req): ?>
+                            <div class="inner-card" 
+                                 data-name="<?php echo htmlspecialchars($req['employee_fname'] . ' ' . $req['employee_lname']); ?>" 
+                                 data-item="<?php echo htmlspecialchars($req['asset_name']); ?>"
+                                 data-qty="<?php echo $req['quantity_requested']; ?>"
+                                 data-date="<?php echo $req['request_date']; ?>">
+                                <div class="item-details">
+                                    <span><b>Requested by:</b> <?php echo htmlspecialchars($req['employee_fname'] . ' ' . $req['employee_lname']); ?></span>
+                                    <span><b>Requested Item:</b> <?php echo htmlspecialchars($req['asset_name']); ?></span>
+                                    <span><b>Quantity:</b> <?php echo intval($req['quantity_requested']); ?></span>
+                                    <span><b>Department:</b> <?php echo htmlspecialchars($req['department_name'] ?? 'N/A'); ?></span>
+                                    <span><b>Date:</b> <?php echo date('m/d/Y', strtotime($req['request_date'])); ?></span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p style="color: rgba(255,255,255,0.7); text-align: center; padding: 20px;">No requests found</p>
+                    <?php endif; ?>
+                </div>
+
+            </div>
+
+            <!-- RIGHT side - Log Request Form -->
+            <div class="right-panel">
+                <h2>Log a Request</h2>
+
+                <form method="POST">
+                    <label>Requested By:</label>
+                    <select name="employee_id" required>
+                        <option value="">-- Select Employee --</option>
+                        <?php foreach ($employees as $emp): ?>
+                            <option value="<?php echo $emp['employee_id']; ?>">
+                                <?php echo htmlspecialchars($emp['employee_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+
+                    <label>Requested Item:</label>
+                    <select name="asset_id" required>
+                        <option value="">-- Select Asset --</option>
                         <?php foreach ($assets as $asset): ?>
                             <option value="<?php echo $asset['asset_id']; ?>">
                                 <?php echo htmlspecialchars($asset['asset_name']); ?> 
@@ -457,61 +497,16 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label for="employee_id">Requester:</label>
-                    <select id="employee_id" name="employee_id" required>
-                        <option value="">-- Select an Employee --</option>
-                        <?php foreach ($employees as $emp): ?>
-                            <option value="<?php echo $emp['employee_id']; ?>">
-                                <?php echo htmlspecialchars($emp['employee_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="quantity">Quantity Requested:</label>
-                    <input type="number" id="quantity" name="quantity" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="request_date">Request Date:</label>
-                    <input type="date" id="request_date" name="request_date" value="<?php echo date('Y-m-d'); ?>" required>
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary" name="action" value="submit_request">Submit Request</button>
-                </div>
-            </form>
-        </div>
 
-        <!-- Request History -->
-        <div class="card">
-            <h2>Request History (<?php echo count($requests); ?>)</h2>
-            <?php if (!empty($requests)): ?>
-                <table class="requests-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Asset</th>
-                            <th>Quantity</th>
-                            <th>Requester</th>
-                            <th>Department</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($requests as $request): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($request['request_date']); ?></td>
-                                <td><?php echo htmlspecialchars($request['asset_name']); ?></td>
-                                <td><?php echo intval($request['quantity_requested']); ?></td>
-                                <td><?php echo htmlspecialchars($request['employee_fname'] . ' ' . $request['employee_lname']); ?></td>
-                                <td><?php echo htmlspecialchars($request['department_name'] ?? 'N/A'); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p style="color: #999; text-align: center; padding: 20px;">No requests found</p>
-            <?php endif; ?>
+                    <label>Quantity:</label>
+                    <input type="number" name="quantity" min="1" required>
+
+                    <label>Date:</label>
+                    <input type="date" name="request_date" value="<?php echo date('Y-m-d'); ?>" required>
+
+                    <button type="submit" name="action" value="submit_request" class="log-btn">Log Request</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -522,7 +517,7 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         function toggleProfile(event) {
             event.preventDefault();
             profileOpen = !profileOpen;
-            
+
             if (profileOpen) {
                 sidebar.classList.add('expanded');
             } else {
@@ -536,7 +531,66 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 profileOpen = false;
             }
         });
-    </script>
 
+        // Auto-hide message after 3 seconds
+        const message = document.querySelector('.message');
+        if (message) {
+            setTimeout(() => {
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 300);
+            }, 3000);
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.inner-card');
+            
+            cards.forEach(card => {
+                const name = card.dataset.name.toLowerCase();
+                const item = card.dataset.item.toLowerCase();
+                if (name.includes(searchTerm) || item.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Sort functionality
+        document.getElementById('sortSelect').addEventListener('change', function(e) {
+            const sortBy = e.target.value;
+            const container = document.getElementById('requestsList');
+            const cards = Array.from(container.querySelectorAll('.inner-card'));
+            
+            cards.sort((a, b) => {
+                const nameA = a.dataset.name.toLowerCase();
+                const nameB = b.dataset.name.toLowerCase();
+                const qtyA = parseInt(a.dataset.qty);
+                const qtyB = parseInt(b.dataset.qty);
+                const dateA = new Date(a.dataset.date);
+                const dateB = new Date(b.dataset.date);
+                
+                switch(sortBy) {
+                    case 'name-asc':
+                        return nameA.localeCompare(nameB);
+                    case 'name-desc':
+                        return nameB.localeCompare(nameA);
+                    case 'qty-asc':
+                        return qtyA - qtyB;
+                    case 'qty-desc':
+                        return qtyB - qtyA;
+                    case 'date-asc':
+                        return dateA - dateB;
+                    case 'date-desc':
+                        return dateB - dateA;
+                    default:
+                        return 0;
+                }
+            });
+            
+            cards.forEach(card => container.appendChild(card));
+        });
+    </script>
 </body>
 </html>

@@ -79,27 +79,20 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        html {
+        html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #1a1a2e;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            min-height: 100vh;
             font-family: 'DM Sans', Arial, sans-serif;
             background-image: url("../image/sims_bg.png");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background-attachment: fixed;
+            overflow: hidden;
         }
 
+        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -116,11 +109,11 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             transition: width 0.3s ease;
             z-index: 100;
             overflow-y: auto;
-            scrollbar-width: none;
+            scrollbar-width: none; 
         }
 
         .sidebar::-webkit-scrollbar {
-            display: none;
+            display: none; 
         }
 
         .sidebar.expanded {
@@ -132,177 +125,9 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             pointer-events: none;
         }
 
-        .sidebar.expanded .nav-links {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .sidebar.expanded .logo {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .sidebar.expanded .profile-panel {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .main-content {
-            margin-left: 220px;
-            padding: 40px;
-            min-height: 100vh;
-            box-sizing: border-box;
-            padding-bottom: 80px;
-            overflow-y: auto;
-            transition: margin-left 0.3s ease;
-        }
-
-        .sidebar.expanded ~ .main-content {
-            margin-left: 350px;
-        }
-
-        .main-content h1 {
-            color: white;
-            margin-top: 0;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .card h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: white;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: white;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 8px;
-            background: rgba(255,255,255,0.9);
-            color: #0F1B65;
-            box-sizing: border-box;
-            font-family: 'DM Sans', Arial, sans-serif;
-            font-size: 14px;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #0F1B65;
-            background: white;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: 'DM Sans', Arial, sans-serif;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-        .btn-primary {
-            background: rgba(15, 27, 101, 0.8);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: rgba(15, 27, 101, 1);
-        }
-
-        .btn-danger {
-            background: rgba(220, 53, 69, 0.8);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: rgba(220, 53, 69, 1);
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .message.success {
-            background: rgba(40, 167, 69, 0.3);
-            color: #98fb98;
-            border: 1px solid rgba(40, 167, 69, 0.5);
-        }
-
-        .message.error {
-            background: rgba(220, 53, 69, 0.3);
-            color: #ff6b6b;
-            border: 1px solid rgba(220, 53, 69, 0.5);
-        }
-
-        .assets-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .assets-table thead {
-            background: rgba(15, 27, 101, 0.2);
-        }
-
-        .assets-table th {
-            padding: 12px;
-            text-align: left;
-            color: white;
-            font-weight: 600;
-            border-bottom: 2px solid rgba(255,255,255,0.2);
-        }
-
-        .assets-table td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            color: white;
-        }
-
-        .assets-table tbody tr:hover {
-            background: rgba(255,255,255,0.05);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
+        .sidebar .logo {
+            width: 250px;
+            margin-bottom: 10px;
         }
 
         .nav-links {
@@ -310,6 +135,12 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .nav-links {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .sidebar a {
@@ -327,12 +158,6 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             box-sizing: border-box;
         }
 
-        .sidebar a .icon {
-            width: 30px;
-            height: 30px;
-            margin-right: 12px;
-        }
-
         .sidebar a:hover {
             background: rgba(15, 27, 101, 0.67);
         }
@@ -341,11 +166,16 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background: rgba(15, 27, 101, 0.8);
         }
 
+        .sidebar a .icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 12px;
+        }
+
         .sidebar a.logout {
             margin-top: auto;
             margin-bottom: 40px;
             background: rgba(15, 27, 101, 0.67);
-            width: 90%;
             justify-content: center;
         }
 
@@ -353,11 +183,7 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background: rgba(15, 27, 101, 0.85);
         }
 
-        .sidebar .logo {
-            width: 250px;
-            margin-bottom: 10px;
-        }
-
+        /* Profile Panel */
         .profile-panel {
             position: absolute;
             top: 120px;
@@ -373,6 +199,11 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease 0.1s;
+        }
+
+        .sidebar.expanded .profile-panel {
+            opacity: 1;
+            pointer-events: all;
         }
 
         .profile-name {
@@ -392,7 +223,7 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .profile-logout {
-            margin-top: 20px;
+            margin-top: auto;
             margin-bottom: 20px;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
@@ -417,30 +248,217 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             height: 20px;
         }
 
-        .profile-back {
-            margin-top: auto;
-            margin-bottom: 0;
-            padding: 12px 30px;
-            background: rgba(15, 27, 101, 0.67);
+        /* Main content */
+        .main-content {
+            margin-left: 220px;
+            padding: 40px;
+            height: 100vh;
+            box-sizing: border-box;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.expanded ~ .main-content {
+            margin-left: 350px;
+        }
+
+        .main-content h1 {
             color: white;
+            margin: 0 0 25px 0;
+            font-size: 36px;
+        }
+
+        /* Message alerts */
+        .message {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .message.success {
+            background: rgba(40, 167, 69, 0.3);
+            color: #98fb98;
+            border: 1px solid rgba(40, 167, 69, 0.5);
+        }
+
+        .message.error {
+            background: rgba(220, 53, 69, 0.3);
+            color: #ff6b6b;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+
+        /* Layout of main panel */
+        .content-wrapper {
+            display: flex;
+            gap: 25px;
+            height: calc(100vh - 120px);
+        }
+
+        /* LEFT PANEL */
+        .assets-panel {
+            flex: 2;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            padding: 25px;
+            border-radius: 18px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .assets-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .search-bar {
+            width: 200px;
+            padding: 8px 12px;
+            border-radius: 20px;
             border: none;
-            border-radius: 10px;
-            font-weight: 700;
+            outline: none;
+        }
+
+        .sort-btn {
+            appearance: none;
+            background-color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: #0F1B65;
+        }
+
+        .scroll-area {
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
+        }
+
+        .inner-card {
+            background: rgba(255,255,255,0.85);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            color: #0F1B65;
+            box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .inner-card .edit-btn {
+            background: transparent;
+            border: none;
+            color: #0f6513;
+            font-weight: bold;
             font-size: 16px;
             cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            flex: 1;
+            padding: 25px;
+            color: white;
+            text-align: center;
+        }
+
+        .right-panel h2 {
+            margin-bottom: 30px;
+        }
+
+        .right-panel label {
+            display: block;
+            text-align: left;
+            margin-left: 15px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .right-panel input {
+            width: 92%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 18px;
+            outline: none;
+        }
+
+        .add-btn {
+            width: 60%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            background: #0F1B65;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 10px auto 0 auto;
+        }
+
+        .add-btn:hover {
+            background: #162897;
+        }
+
+        /* Edit buttons */
+        .edit-buttons {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
         }
 
-        .profile-back:hover {
-            background: rgba(15, 27, 101, 0.85);
+        .delete-btn {
+            padding: 10px 25px;
+            border-radius: 15px;
+            background: #d32f2f;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
         }
 
-        .profile-back img {
-            width: 20px;
-            height: 20px;
+        .delete-btn:hover {
+            background: #b71c1c;
+        }
+
+        .save-btn {
+            padding: 10px 25px;
+            border-radius: 15px;
+            background: #0F1B65;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background: #162897;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -448,8 +466,9 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <?php include __DIR__ . '/user_sidebar.php'; ?>
 
+    <!-- Main Content -->
     <div class="main-content">
-        <h1>Asset Management</h1>
+        <h1>Assets</h1>
 
         <?php if ($message): ?>
             <div class="message <?php echo $message_type; ?>">
@@ -457,61 +476,72 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         <?php endif; ?>
 
-        <!-- Add New Asset Form -->
-        <div class="card">
-            <h2>Add New Asset</h2>
-            <form method="POST">
-                <div class="form-group">
-                    <label for="asset_name">Asset Name:</label>
-                    <input type="text" id="asset_name" name="asset_name" required>
-                </div>
-                <div class="form-group">
-                    <label for="asset_quantity">Initial Quantity:</label>
-                    <input type="number" id="asset_quantity" name="asset_quantity" min="0" required>
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary" name="action" value="add">Add Asset</button>
-                </div>
-            </form>
-        </div>
+        <div class="content-wrapper">
 
-        <!-- Assets List -->
-        <div class="card">
-            <h2>All Assets (<?php echo count($assets); ?>)</h2>
-            <?php if (!empty($assets)): ?>
-                <table class="assets-table">
-                    <thead>
-                        <tr>
-                            <th>Asset Name</th>
-                            <th>Quantity</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <!-- LEFT side - Assets List -->
+            <div class="assets-panel">
+
+                <div class="assets-header">
+                    <input type="text" class="search-bar" id="searchInput" placeholder="Search">
+
+                    <select class="sort-btn" id="sortSelect">
+                        <option value="name-asc">Ascending Alphabetical</option>
+                        <option value="name-desc">Descending Alphabetical</option>
+                        <option value="qty-asc">Ascending Quantity</option>
+                        <option value="qty-desc">Descending Quantity</option>
+                    </select>
+                </div>
+
+                <div class="scroll-area" id="assetsList">
+                    <?php if (!empty($assets)): ?>
                         <?php foreach ($assets as $asset): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($asset['asset_name']); ?></td>
-                                <td><?php echo intval($asset['asset_quantity']); ?> units</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <form method="POST" style="display: inline;">
-                                            <input type="hidden" name="asset_id" value="<?php echo $asset['asset_id']; ?>">
-                                            <input type="hidden" name="asset_quantity" value="">
-                                            <button type="button" class="btn btn-small btn-primary" onclick="editAsset(<?php echo $asset['asset_id']; ?>, '<?php echo htmlspecialchars($asset['asset_name']); ?>', <?php echo $asset['asset_quantity']; ?>)">Edit</button>
-                                        </form>
-                                        <form method="POST" style="display: inline;">
-                                            <input type="hidden" name="asset_id" value="<?php echo $asset['asset_id']; ?>">
-                                            <button type="submit" class="btn btn-small btn-danger" name="action" value="delete" onclick="return confirm('Delete this asset?');">Delete</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
+                            <div class="inner-card" data-name="<?php echo htmlspecialchars($asset['asset_name']); ?>" data-qty="<?php echo $asset['asset_quantity']; ?>">
+                                <div class="item-details">
+                                    <span><b>Item:</b> <?php echo htmlspecialchars($asset['asset_name']); ?></span>
+                                    <span><b>Quantity:</b> <?php echo intval($asset['asset_quantity']); ?></span>
+                                </div>
+                                <button class="edit-btn" onclick="showEditPanel(<?php echo $asset['asset_id']; ?>, '<?php echo htmlspecialchars($asset['asset_name']); ?>', <?php echo $asset['asset_quantity']; ?>)">Edit</button>
+                            </div>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p style="color: #999; text-align: center; padding: 20px;">No assets found</p>
-            <?php endif; ?>
+                    <?php else: ?>
+                        <p style="color: rgba(255,255,255,0.7); text-align: center; padding: 20px;">No assets found</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- RIGHT side - ADD PANEL -->
+            <div class="right-panel" id="addPanel">
+                <h2>Add an Item</h2>
+
+                <form method="POST">
+                    <label>Item:</label>
+                    <input type="text" name="asset_name" required>
+
+                    <label>Quantity:</label>
+                    <input type="number" name="asset_quantity" min="0" required>
+
+                    <button type="submit" name="action" value="add" class="add-btn">Add Asset</button>
+                </form>
+            </div>
+
+            <!-- RIGHT SIDE - EDIT PANEL -->
+            <div class="right-panel hidden" id="editPanel">
+                <h2>Edit an Item</h2>
+
+                <label>Item:</label>
+                <input type="text" id="editItemName" readonly style="background: #f0f0f0;">
+
+                <label>Quantity:</label>
+                <input type="number" id="editItemQuantity" min="0">
+
+                <input type="hidden" id="editItemId">
+
+                <div class="edit-buttons">
+                    <button class="delete-btn" onclick="deleteItem()">Delete</button>
+                    <button class="save-btn" onclick="saveItem()">Save</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -522,7 +552,7 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
         function toggleProfile(event) {
             event.preventDefault();
             profileOpen = !profileOpen;
-            
+
             if (profileOpen) {
                 sidebar.classList.add('expanded');
             } else {
@@ -537,20 +567,93 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         });
 
-        function editAsset(assetId, name, quantity) {
-            const newQty = prompt('Edit quantity for "' + name + '":\n\nCurrent quantity: ' + quantity, quantity);
-            if (newQty !== null && newQty !== '') {
+        function showEditPanel(assetId, itemName, quantity) {
+            document.getElementById('addPanel').classList.add('hidden');
+            document.getElementById('editPanel').classList.remove('hidden');
+
+            document.getElementById('editItemId').value = assetId;
+            document.getElementById('editItemName').value = itemName;
+            document.getElementById('editItemQuantity').value = quantity;
+        }
+
+        function saveItem() {
+            const assetId = document.getElementById('editItemId').value;
+            const qty = document.getElementById('editItemQuantity').value;
+
+            if (qty < 0) {
+                alert('Quantity cannot be negative');
+                return;
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.innerHTML = `
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="asset_id" value="${assetId}">
+                <input type="hidden" name="asset_quantity" value="${qty}">
+            `;
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function deleteItem() {
+            const itemName = document.getElementById('editItemName').value;
+            const assetId = document.getElementById('editItemId').value;
+
+            if (confirm(`Delete ${itemName}?`)) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.innerHTML = `
-                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="asset_id" value="${assetId}">
-                    <input type="hidden" name="asset_quantity" value="${newQty}">
                 `;
                 document.body.appendChild(form);
                 form.submit();
             }
         }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.inner-card');
+            
+            cards.forEach(card => {
+                const name = card.dataset.name.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Sort functionality
+        document.getElementById('sortSelect').addEventListener('change', function(e) {
+            const sortBy = e.target.value;
+            const container = document.getElementById('assetsList');
+            const cards = Array.from(container.querySelectorAll('.inner-card'));
+            
+            cards.sort((a, b) => {
+                const nameA = a.dataset.name.toLowerCase();
+                const nameB = b.dataset.name.toLowerCase();
+                const qtyA = parseInt(a.dataset.qty);
+                const qtyB = parseInt(b.dataset.qty);
+                
+                switch(sortBy) {
+                    case 'name-asc':
+                        return nameA.localeCompare(nameB);
+                    case 'name-desc':
+                        return nameB.localeCompare(nameA);
+                    case 'qty-asc':
+                        return qtyA - qtyB;
+                    case 'qty-desc':
+                        return qtyB - qtyA;
+                    default:
+                        return 0;
+                }
+            });
+            cards.forEach(card => container.appendChild(card));
+        });
     </script>
 
 </body>
