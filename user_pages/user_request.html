@@ -17,38 +17,7 @@
         }
 
         /* Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 220px;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
-            transition: width 0.3s ease;
-            z-index: 100;
-            overflow-y: auto;
-            scrollbar-width: none; 
-        }
-
-        .sidebar::-webkit-scrollbar {
-            display: none; 
-        }
-
-        .sidebar.expanded {
-            width: 350px;
-        }
-
-        .sidebar.expanded .logout {
-            opacity: 0;
-            pointer-events: none;
-        }
-
+        <?php include __DIR__ . '/user_sidebar.php'; ?>
         .sidebar .logo {
             width: 250px;
             margin-bottom: 10px;
@@ -92,7 +61,7 @@
             margin-right: 12px;
         }
 
-        /* FIXED LOGOUT BUTTON */
+        /* --- FIXED LOGOUT BUTTON --- */
         .sidebar a.logout {
             margin-top: auto;
             margin-bottom: 40px;
@@ -144,7 +113,7 @@
         }
 
         .profile-logout {
-            margin-top: 20px;
+            margin-top: auto;
             margin-bottom: 20px;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
@@ -165,32 +134,6 @@
         }
 
         .profile-logout img {
-            width: 20px;
-            height: 20px;
-        }
-
-.profile-back {
-            margin-top: auto;
-            margin-bottom: 0;
-            padding: 12px 30px;
-            background: rgba(15, 27, 101, 0.67);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s;
-        }
-
-        .profile-back:hover {
-            background: rgba(15, 27, 101, 0.85);
-        }
-
-        .profile-back img {
             width: 20px;
             height: 20px;
         }
@@ -249,10 +192,9 @@
         }
 
         .sort-btn {
-            appearance: none;
-            background-color: white;
             padding: 8px 15px;
             border-radius: 20px;
+            background: rgba(255,255,255,0.8);
             border: none;
             font-weight: 600;
             cursor: pointer;
@@ -291,18 +233,13 @@
         /* RIGHT PANEL */
         .right-panel {
             flex: 1;
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(8px);
             padding: 25px;
-            border-radius: 18px;
             color: white;
-            display: flex;
-            flex-direction: column;
+            text-align: center;
         }
 
         .right-panel h2 {
             margin-bottom: 30px;
-            text-align: center;
         }
 
         .right-panel label {
@@ -313,21 +250,13 @@
             font-weight: 600;
         }
 
-        .right-panel input,
-        .right-panel textarea,
-        .right-panel select {
+        .right-panel input {
             width: 92%;
             padding: 10px 12px;
             border-radius: 12px;
             border: none;
             margin-bottom: 18px;
             outline: none;
-            font-family: 'DM Sans', Arial, sans-serif;
-        }
-
-        .right-panel textarea {
-            resize: vertical;
-            min-height: 80px;
         }
 
         .log-btn {
@@ -353,7 +282,32 @@
 <body>
 
     <!-- Sidebar -->
-    <?php include __DIR__ . '/user_sidebar.php'; ?>
+    <div class="sidebar" id="sidebar">
+        <img src="../image/sims_logo.png" class="logo">
+
+        <!-- Navigation Links -->
+        <div class="nav-links">
+            <a href="#" onclick="toggleProfile(event)"><img src="../image/profile.png" class="icon">Profile</a>
+            <a href="user_dashboard.php"><img src="../image/user_dashboard.png" class="icon">Dashboard</a>
+            <a href="user_asset.php"><img src="../image/assets.png" class="icon">Assets</a>
+            <a href="user_request.php"><img src="../image/requests.png" class="icon">Request Log</a>
+            <a href="user_report.php"><img src="../image/report.png" class="icon">Report</a>
+        </div>
+
+        <!-- ⭐ FIXED DASHBOARD-STYLE LOGOUT -->
+        <a href="../php/logout.php" class="logout">
+            <img src="../image/logout.png" class="icon">Log Out
+        </a>
+
+        <!-- Profile Panel -->
+        <div class="profile-panel">
+            <div class="profile-name">FName<br>LName</div>
+            <div class="profile-email">email@gmail.com</div>
+            <button class="profile-logout">
+                <img src="../image/logout.png">Log out
+            </button>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -378,7 +332,7 @@
                 <div class="scroll-area">
                     <div class="inner-card">
                         <div class="item-details">
-                            <span><b>Requested by:</b>Shayne</span>
+                            <span><b>Requested by:</b> Shayne</span>
                             <span><b>Requested Item:</b> Paper</span>
                             <span><b>Quantity:</b> 50</span>
                             <span><b>Department:</b> HR</span>
