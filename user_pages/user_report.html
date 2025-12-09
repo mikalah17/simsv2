@@ -18,7 +18,33 @@
         }
 
         /* Sidebar */
-        <?php include __DIR__ . '/user_sidebar.php'; ?>
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 220px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            transition: width 0.3s ease;
+            z-index: 100;
+            overflow-y: auto;
+            scrollbar-width: none; 
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none; 
+        }
+
+        .sidebar.expanded {
+            width: 350px;
+        }
+
         .sidebar.expanded .logout {
             opacity: 0;
             pointer-events: none;
@@ -67,7 +93,7 @@
             margin-right: 12px;
         }
 
-        /* FIXED DASHBOARD LOGOUT */
+        /* FIXED LOGOUT BUTTON */
         .sidebar a.logout {
             margin-top: auto;
             margin-bottom: 40px;
@@ -119,7 +145,7 @@
         }
 
         .profile-logout {
-            margin-top: auto;
+            margin-top: 20px;
             margin-bottom: 20px;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
@@ -144,6 +170,32 @@
             height: 20px;
         }
 
+.profile-back {
+            margin-top: auto;
+            margin-bottom: 0;
+            padding: 12px 30px;
+            background: rgba(15, 27, 101, 0.67);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .profile-back:hover {
+            background: rgba(15, 27, 101, 0.85);
+        }
+
+        .profile-back img {
+            width: 20px;
+            height: 20px;
+        }
+
         /* Main content */
         .main-content {
             margin-left: 220px;
@@ -151,6 +203,7 @@
             height: 100vh;
             box-sizing: border-box;
             transition: margin-left 0.3s ease;
+            overflow-y: auto;
         }
 
         .sidebar.expanded ~ .main-content {
@@ -161,7 +214,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .main-content h1 {
@@ -171,19 +224,19 @@
         }
 
         .generate-btn {
-            padding: 12px 30px;
-            border-radius: 25px;
-            background: rgba(15, 27, 101, 0.8);
+            padding: 10px 25px;
+            border-radius: 15px;
+            background: #0F1B65;
             border: none;
             color: white;
-            font-weight: 700;
-            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
+            font-family: 'DM Sans', Arial, sans-serif;
+            font-size: 14px;
         }
 
         .generate-btn:hover {
-            background: rgba(15, 27, 101, 1);
+            background: #162897;
         }
 
         /* Charts Container */
@@ -195,7 +248,7 @@
         }
 
         .chart-panel {
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.12);
             backdrop-filter: blur(8px);
             padding: 25px;
             border-radius: 18px;
@@ -255,32 +308,7 @@
 <body>
 
     <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <img src="../image/sims_logo.png" class="logo">
-
-        <!-- Navigation Links -->
-        <div class="nav-links">
-            <a href="#" onclick="toggleProfile(event)"><img src="../image/profile.png" class="icon">Profile</a>
-            <a href="user_dashboard.php"><img src="../image/user_dashboard.png" class="icon">Dashboard</a>
-            <a href="user_asset.php"><img src="../image/assets.png" class="icon">Assets</a>
-            <a href="user_request.php"><img src="../image/requests.png" class="icon">Request Log</a>
-            <a href="user_report.php"><img src="../image/report.png" class="icon">Report</a>
-        </div>
-
-        <!-- FIXED LOGOUT (DASHBOARD STYLE) -->
-        <a href="../php/logout.php" class="logout">
-            <img src="../image/logout.png" class="icon">Log Out
-        </a>
-
-        <!-- Profile Panel -->
-        <div class="profile-panel">
-            <div class="profile-name">FName<br>LName</div>
-            <div class="profile-email">email@gmail.com</div>
-            <button class="profile-logout">
-                <img src="../image/logout.png">Log out
-            </button>
-        </div>
-    </div>
+    <?php include __DIR__ . '/user_sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">

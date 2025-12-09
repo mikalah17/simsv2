@@ -1,5 +1,11 @@
 <?php
 // Shared admin sidebar include
+// Note: session_start() is called in auth_check.php before this file is included
+
+// Get user name from session
+$firstName = isset($_SESSION['first_name']) ? htmlspecialchars($_SESSION['first_name']) : 'First';
+$lastName = isset($_SESSION['last_name']) ? htmlspecialchars($_SESSION['last_name']) : 'Last';
+$email = isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'email@gmail.com';
 ?>
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
@@ -21,9 +27,13 @@
     
     <!-- Profile Panel (Hidden by default) -->
     <div class="profile-panel">
-        <div class="profile-name">FName<br>LName</div>
-        <div class="profile-email">email@gmail.com</div>
-        <button class="profile-logout">
+        <div class="profile-name"><?php echo $firstName; ?><br><?php echo $lastName; ?></div>
+        <div class="profile-email"><?php echo $email; ?></div>
+        <button class="profile-back" onclick="toggleProfile(event)">
+            <img src="../image/logout.png" style="transform: rotate(180deg);">
+            Back
+        </button>
+        <button class="profile-logout" onclick="window.location.href='../php/logout.php';">
             <img src="../image/logout.png">
             Log out
         </button>
