@@ -200,6 +200,13 @@ foreach ($weeklyData as $row) {
             margin-bottom: 40px;
             background: rgba(15, 27, 101, 0.67);
             justify-content: center;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .sidebar a.logout {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .sidebar a.logout:hover {
@@ -216,7 +223,7 @@ foreach ($weeklyData as $row) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             padding: 40px 30px;
             box-sizing: border-box;
             opacity: 0;
@@ -242,12 +249,21 @@ foreach ($weeklyData as $row) {
             color: white;
             font-size: 16px;
             text-align: center;
-            margin: 10px 0 0 0;
+            margin: 10px 0 40px 0;
+        }
+
+        .profile-buttons {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            align-items: center;
+            padding-bottom: 30px;
         }
 
         .profile-logout {
-            margin-top: auto;
-            margin-bottom: 20px;
+            margin: 0;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
             color: white;
@@ -260,6 +276,8 @@ foreach ($weeklyData as $row) {
             align-items: center;
             gap: 10px;
             transition: 0.3s;
+            width: 90%;
+            justify-content: center;
         }
 
         .profile-logout:hover {
@@ -272,8 +290,7 @@ foreach ($weeklyData as $row) {
         }
 
         .profile-back {
-            margin-top: auto;
-            margin-bottom: 20px;
+            margin: 0;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
             color: white;
@@ -286,6 +303,8 @@ foreach ($weeklyData as $row) {
             align-items: center;
             gap: 10px;
             transition: 0.3s;
+            width: 90%;
+            justify-content: center;
         }
 
         .profile-back:hover {

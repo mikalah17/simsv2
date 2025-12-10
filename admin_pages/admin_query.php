@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['query'])) {
     if (!empty($query)) {
         try {
             // Log the query to history
-            $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+            $user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0;
             
             // Get the next query_id
             $maxStmt = $pdo->query("SELECT MAX(query_id) as max_id FROM query");
@@ -41,6 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['query'])) {
             
             $historyStmt = $pdo->prepare("INSERT INTO query (query_id, user_id, queryDesc, queryTime) VALUES (?, ?, ?, NOW())");
             $historyStmt->execute([$nextId, $user_id, $query]);
+            
+            // Log to audit table
+            $queryType = strtoupper(substr(trim($query), 0, 6));
+            logAudit($pdo, $user_id, 'EXECUTE_QUERY', 'query', $nextId, "Executed $queryType query");
             
             // Execute the query
             $stmt = $pdo->query($query);

@@ -139,6 +139,13 @@ try {
             background: rgba(15, 27, 101, 0.67); 
             width: 90%;
             justify-content: center;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .sidebar a.logout {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .sidebar a.logout:hover {
@@ -155,7 +162,7 @@ try {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             padding: 40px 30px;
             box-sizing: border-box;
             opacity: 0;
@@ -181,12 +188,21 @@ try {
             color: white;
             font-size: 16px;
             text-align: center;
-            margin: 10px 0 0 0;
+            margin: 10px 0 40px 0;
+        }
+
+        .profile-buttons {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            align-items: center;
+            padding-bottom: 30px;
         }
 
         .profile-logout {
-            margin-top: auto;
-            margin-bottom: 20px;
+            margin: 0;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
             color: white;
@@ -199,6 +215,8 @@ try {
             align-items: center;
             gap: 10px;
             transition: 0.3s;
+            width: 90%;
+            justify-content: center;
         }
 
         .profile-logout:hover {
@@ -211,8 +229,7 @@ try {
         }
 
         .profile-back {
-            margin-top: auto;
-            margin-bottom: 20px;
+            margin: 0;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
             color: white;
@@ -225,6 +242,8 @@ try {
             align-items: center;
             gap: 10px;
             transition: 0.3s;
+            width: 90%;
+            justify-content: center;
         }
 
         .profile-back:hover {
@@ -329,30 +348,8 @@ try {
 
     <!-- Sidebar -->
     <?php include __DIR__ . '/user_sidebar.php'; ?>
-    <div class="sidebar" id="sidebar">
-        <img src="../image/sims_logo.png" class="logo">
-        
-        <!-- Navigation Links -->
-        <div class="nav-links">
-            <a href="#" onclick="toggleProfile(event)"><img src="../image/profile.png" class="icon">Profile</a>
-            <a href="user_dashboard.php"><img src="../image/user_dashboard.png" class="icon">Dashboard</a>
-            <a href="user_asset.php"><img src="../image/assets.png" class="icon">Assets</a>
-            <a href="user_request.php"><img src="../image/requests.png" class="icon">Request Log</a>
-            <a href="user_report.php"><img src="../image/report.png" class="icon">Report</a>
-        </div>
 
-            <a href="../php/logout.php" class="logout"><img src="../image/logout.png" class="icon">Log Out</a>
-
-        <!-- Profile Panel (Hidden by default) -->
-        <div class="profile-panel">
-            <div class="profile-name">FName<br>LName</div>
-            <div class="profile-email">email@gmail.com</div>
-            <button class="profile-logout" onclick="window.location.href='../php/logout.php'">
-                <img src="../image/logout.png">
-                Log out
-            </button>
-        </div>
-    </div>
+    <!-- Main content -->
 
     <!-- Main content -->
     <div class="main-content">

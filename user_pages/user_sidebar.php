@@ -26,13 +26,15 @@ $email = isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'ema
     <div class="profile-panel">
         <div class="profile-name"><?php echo $firstName; ?><br><?php echo $lastName; ?></div>
         <div class="profile-email"><?php echo $email; ?></div>
-        <button class="profile-back" onclick="toggleProfile(event)">
-            <img src="../image/logout.png" style="transform: rotate(180deg);">
-            Back
-        </button>
-        <button class="profile-logout" onclick="window.location.href='../php/logout.php';">
-            <img src="../image/logout.png">
-            Log out
-        </button>
+        <div class="profile-buttons">
+            <button class="profile-back" onclick="toggleProfile(event)">
+                <img src="../image/logout.png" style="transform: rotate(180deg);">
+                Back
+            </button>
+            <button class="profile-logout" onclick="window.location.href='../php/logout.php';">
+                <img src="../image/logout.png">
+                Log out
+            </button>
+        </div>
     </div>
 </div>

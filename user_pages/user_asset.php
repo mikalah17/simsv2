@@ -8,6 +8,7 @@ $pdo = getPDO();
 $assets = [];
 $message = '';
 $message_type = '';
+$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0;
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -28,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->prepare('INSERT INTO asset (asset_id, asset_name, asset_quantity) VALUES (?, ?, ?)')
                     ->execute([$nextId, $name, $quantity]);
+                logAudit($pdo, $user_id, 'INSERT', 'asset', $nextId, "Added asset: $name (Qty: $quantity)");
                 $message = 'Asset added successfully!';
                 $message_type = 'success';
             }
@@ -42,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->prepare('UPDATE asset SET asset_quantity = ? WHERE asset_id = ?')
                     ->execute([$quantity, $asset_id]);
+                logAudit($pdo, $user_id, 'UPDATE', 'asset', $asset_id, "Updated asset quantity to: $quantity");
                 $message = 'Asset updated successfully!';
                 $message_type = 'success';
             }
@@ -63,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 $pdo->prepare('DELETE FROM asset WHERE asset_id = ?')->execute([$asset_id]);
+                logAudit($pdo, $user_id, 'DELETE', 'asset', $asset_id, "Deleted asset ID: $asset_id");
                 $message = 'Asset deleted successfully!';
                 $message_type = 'success';
             }
@@ -182,6 +186,13 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             margin-bottom: 40px;
             background: rgba(15, 27, 101, 0.67);
             justify-content: center;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .sidebar a.logout {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .sidebar a.logout:hover {
@@ -198,7 +209,7 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             padding: 40px 30px;
             box-sizing: border-box;
             opacity: 0;
@@ -224,12 +235,21 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: white;
             font-size: 16px;
             text-align: center;
-            margin: 10px 0 0 0;
+            margin: 10px 0 40px 0;
+        }
+
+        .profile-buttons {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            align-items: center;
+            padding-bottom: 30px;
         }
 
         .profile-logout {
-            margin-top: auto;
-            margin-bottom: 20px;
+            margin: 0;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
             color: white;
@@ -242,6 +262,8 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             align-items: center;
             gap: 10px;
             transition: 0.3s;
+            width: 90%;
+            justify-content: center;
         }
 
         .profile-logout:hover {
@@ -254,8 +276,7 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .profile-back {
-            margin-top: auto;
-            margin-bottom: 20px;
+            margin: 0;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
             color: white;
@@ -268,6 +289,8 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             align-items: center;
             gap: 10px;
             transition: 0.3s;
+            width: 90%;
+            justify-content: center;
         }
 
         .profile-back:hover {

@@ -10,6 +10,7 @@ $employees = [];
 $requests = [];
 $message = '';
 $message_type = '';
+$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0;
 
 // Get assets for dropdown
 $stmt = $pdo->query('SELECT asset_id, asset_name, asset_quantity FROM asset ORDER BY asset_name');
@@ -52,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         // Insert request
         $pdo->prepare('INSERT INTO request (request_id, asset_id, quantity_requested, employee_id, request_date) VALUES (?, ?, ?, ?, ?)')
             ->execute([$nextId, $asset_id, $quantity, $employee_id, $request_date]);
+        logAudit($pdo, $user_id, 'INSERT', 'request', $nextId, "Created request for asset ID $asset_id (Qty: $quantity)");
         
         $message = 'Request logged successfully!';
         $message_type = 'success';
@@ -225,8 +227,7 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .profile-logout {
-            margin-top: auto;
-            margin-bottom: 20px;
+            margin: 0;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
             color: white;
@@ -239,6 +240,8 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             align-items: center;
             gap: 10px;
             transition: 0.3s;
+            width: 90%;
+            justify-content: center;
         }
 
         .profile-logout:hover {
@@ -251,8 +254,7 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .profile-back {
-            margin-top: auto;
-            margin-bottom: 20px;
+            margin: 0;
             padding: 12px 30px;
             background: rgba(15, 27, 101, 0.67);
             color: white;
@@ -265,6 +267,8 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             align-items: center;
             gap: 10px;
             transition: 0.3s;
+            width: 90%;
+            justify-content: center;
         }
 
         .profile-back:hover {
@@ -276,6 +280,16 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             height: 20px;
         }
 
+        .profile-buttons {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            align-items: center;
+            padding-bottom: 30px;
+        }
+
         /* Main content */
         .main-content {
             margin-left: 220px;
@@ -283,6 +297,11 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             height: 100vh;
             box-sizing: border-box;
             transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.expanded .logout {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .sidebar.expanded ~ .main-content {

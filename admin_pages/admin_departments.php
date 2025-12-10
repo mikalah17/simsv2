@@ -8,6 +8,7 @@ $pdo = getPDO();
 $departments = [];
 $message = '';
 $message_type = '';
+$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0;
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->prepare('INSERT INTO dept (department_id, department_name) VALUES (?, ?)')
                     ->execute([$nextId, $name]);
+                logAudit($pdo, $user_id, 'INSERT', 'dept', $nextId, "Added department: $name");
                 $message = 'Department added successfully!';
                 $message_type = 'success';
             }
@@ -41,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->prepare('UPDATE dept SET department_name = ? WHERE department_id = ?')
                     ->execute([$name, $department_id]);
+                logAudit($pdo, $user_id, 'UPDATE', 'dept', $department_id, "Updated department to: $name");
                 $message = 'Department updated successfully!';
                 $message_type = 'success';
             }
@@ -62,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 $pdo->prepare('DELETE FROM dept WHERE department_id = ?')->execute([$department_id]);
+                logAudit($pdo, $user_id, 'DELETE', 'dept', $department_id, "Deleted department ID: $department_id");
                 $message = 'Department deleted successfully!';
                 $message_type = 'success';
             }

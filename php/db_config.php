@@ -62,4 +62,34 @@ function getPDO()
     throw new RuntimeException('Database connection failed. Check DB credentials and that MySQL is running.');
 }
 
+/**
+ * Log an action to the audit table
+ * @param PDO $pdo - Database connection
+ * @param int $user_id - User performing the action
+ * @param string $actionType - Type of action (INSERT, UPDATE, DELETE)
+ * @param string $tableAffected - Table name affected
+ * @param int $record_id - ID of the record affected
+ * @param string $action_desc - Description of the action
+ */
+function logAudit($pdo, $user_id, $actionType, $tableAffected, $record_id, $action_desc)
+{
+    try {
+        // Get next audit_id
+        $maxStmt = $pdo->query("SELECT MAX(audit_id) as max_id FROM audit");
+        $maxResult = $maxStmt->fetch(PDO::FETCH_ASSOC);
+        $nextId = ($maxResult['max_id'] ?? 0) + 1;
+        
+        // Insert audit record
+        $auditStmt = $pdo->prepare("
+            INSERT INTO audit (audit_id, user_id, actionType, tableAffected, record_id, action_desc, actionTime) 
+            VALUES (?, ?, ?, ?, ?, ?, NOW())
+        ");
+        $auditStmt->execute([$nextId, $user_id, $actionType, $tableAffected, $record_id, $action_desc]);
+    } catch (Exception $e) {
+        // Log audit failures but don't break the main operation
+        error_log('Audit logging failed: ' . $e->getMessage());
+    }
+}
+
 ?>
+

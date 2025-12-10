@@ -9,6 +9,7 @@ $employees = [];
 $departments = [];
 $message = '';
 $message_type = '';
+$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0;
 
 // Get all departments for dropdown
 $deptStmt = $pdo->query('SELECT department_id, department_name FROM dept ORDER BY department_name');
@@ -35,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->prepare('INSERT INTO employee (employee_id, employee_fname, employee_lname, employee_mname, department_id) VALUES (?, ?, ?, ?, ?)')
                     ->execute([$nextId, $fname, $lname, $mname, $dept_id]);
+                logAudit($pdo, $user_id, 'INSERT', 'employee', $nextId, "Added employee: $fname $lname");
                 $message = 'Employee added successfully!';
                 $message_type = 'success';
             }
@@ -52,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->prepare('UPDATE employee SET employee_fname = ?, employee_lname = ?, employee_mname = ?, department_id = ? WHERE employee_id = ?')
                     ->execute([$fname, $lname, $mname, $dept_id, $employee_id]);
+                logAudit($pdo, $user_id, 'UPDATE', 'employee', $employee_id, "Updated employee: $fname $lname");
                 $message = 'Employee updated successfully!';
                 $message_type = 'success';
             }
@@ -73,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 $pdo->prepare('DELETE FROM employee WHERE employee_id = ?')->execute([$employee_id]);
+                logAudit($pdo, $user_id, 'DELETE', 'employee', $employee_id, "Deleted employee ID: $employee_id");
                 $message = 'Employee deleted successfully!';
                 $message_type = 'success';
             }
