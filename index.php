@@ -78,7 +78,7 @@
     <body>
         <div class="landing-page">
             <img src="image/sims_logo_text.png" class="logo">
-            <h2>Welcome.</h2>
+            <h2>Welcome</h2>
 
             <button class="btn1" onclick="window.location.href='sign_in_page.html'"><b>Sign-in</b></button>
             <button class="btn2" onclick="window.location.href='sign_up_page.html'"><b>Sign-up</b></button>

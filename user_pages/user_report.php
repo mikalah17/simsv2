@@ -101,6 +101,8 @@ foreach ($weeklyData as $row) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         html, body {
             margin: 0;
@@ -342,6 +344,11 @@ foreach ($weeklyData as $row) {
             font-size: 36px;
         }
 
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+
         .generate-btn {
             padding: 12px 30px;
             border-radius: 25px;
@@ -356,6 +363,22 @@ foreach ($weeklyData as $row) {
 
         .generate-btn:hover {
             background: rgba(15, 27, 101, 1);
+        }
+
+        .export-btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            background: rgba(40, 167, 69, 0.8);
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .export-btn:hover {
+            background: rgba(40, 167, 69, 1);
         }
 
         /* Charts Container */
@@ -432,7 +455,10 @@ foreach ($weeklyData as $row) {
     <div class="main-content">
         <div class="header-section">
             <h1>Reports</h1>
-            <button class="generate-btn" onclick="window.print()">Generate Report</button>
+            <div class="button-group">
+                <button class="generate-btn" onclick="window.print()">Generate Report</button>
+                <button class="export-btn" onclick="exportToPDF()">Export to PDF</button>
+            </div>
         </div>
 
         <div class="charts-container">
@@ -603,6 +629,101 @@ foreach ($weeklyData as $row) {
         function updatePieChart(dept) {
             // In a real implementation, this would fetch department-specific asset data
             alert('Showing data for: ' + dept);
+        }
+
+        function exportToPDF() {
+            // Get all chart canvases
+            const lineCanvas = document.getElementById('lineChart');
+            const pieCanvas = document.getElementById('pieChart');
+            
+            if (!lineCanvas || !pieCanvas) {
+                alert('Charts are still loading. Please wait a moment and try again.');
+                return;
+            }
+            
+            // Convert canvas to images
+            const lineImage = lineCanvas.toDataURL('image/png');
+            const pieImage = pieCanvas.toDataURL('image/png');
+            
+            // Create a new document for PDF
+            const doc = new jsPDF('portrait', 'mm', 'a4');
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPosition = 20;
+            
+            // Add title
+            doc.setFontSize(24);
+            doc.setTextColor(15, 27, 101);
+            doc.text('Asset Management Report', pageWidth / 2, yPosition, { align: 'center' });
+            yPosition += 15;
+            
+            // Add date
+            doc.setFontSize(11);
+            doc.setTextColor(100, 100, 100);
+            const reportDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            doc.text('Generated on: ' + reportDate, pageWidth / 2, yPosition, { align: 'center' });
+            yPosition += 15;
+            
+            // Add statistics section
+            doc.setFontSize(13);
+            doc.setTextColor(15, 27, 101);
+            doc.text('Summary Statistics', 15, yPosition);
+            yPosition += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(50, 50, 50);
+            
+            // Get stats from PHP data
+            const totalAssets = <?php echo json_encode($assetStats['total_assets'] ?? 0); ?>;
+            const totalQuantity = <?php echo json_encode($assetStats['total_quantity'] ?? 0); ?>;
+            const avgQuantity = <?php echo json_encode(round($assetStats['avg_quantity'] ?? 0, 2)); ?>;
+            const totalRequests = <?php echo json_encode($requestStats['total_requests'] ?? 0); ?>;
+            const totalQuantityRequested = <?php echo json_encode($requestStats['total_quantity_requested'] ?? 0); ?>;
+            
+            const stats = [
+                'Total Assets: ' + totalAssets,
+                'Total Quantity in Inventory: ' + totalQuantity + ' units',
+                'Average Quantity per Asset: ' + avgQuantity + ' units',
+                'Total Requests Made: ' + totalRequests,
+                'Total Quantity Requested: ' + totalQuantityRequested + ' units'
+            ];
+            
+            stats.forEach(stat => {
+                if (yPosition > pageHeight - 50) {
+                    doc.addPage();
+                    yPosition = 15;
+                }
+                doc.text('• ' + stat, 20, yPosition);
+                yPosition += 7;
+            });
+            
+            yPosition += 10;
+            
+            // Add line chart
+            if (yPosition > pageHeight - 100) {
+                doc.addPage();
+                yPosition = 15;
+            }
+            
+            doc.setFontSize(12);
+            doc.setTextColor(15, 27, 101);
+            doc.text('Weekly Request Trends by Department', 15, yPosition);
+            yPosition += 8;
+            doc.addImage(lineImage, 'PNG', 15, yPosition, 180, 70);
+            yPosition += 75;
+            
+            // Add pie chart on new page
+            doc.addPage();
+            yPosition = 15;
+            
+            doc.setFontSize(12);
+            doc.setTextColor(15, 27, 101);
+            doc.text('Top Requested Assets', 15, yPosition);
+            yPosition += 8;
+            doc.addImage(pieImage, 'PNG', 15, yPosition, 180, 100);
+            
+            // Save the PDF
+            doc.save('asset-report-' + new Date().getTime() + '.pdf');
         }
     </script>
 
