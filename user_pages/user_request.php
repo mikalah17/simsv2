@@ -12,8 +12,8 @@ $message = '';
 $message_type = '';
 $user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0;
 
-// Get assets for dropdown
-$stmt = $pdo->query('SELECT asset_id, asset_name, asset_quantity FROM asset ORDER BY asset_name');
+// Get assets for dropdown (only show those with quantity > 3)
+$stmt = $pdo->query('SELECT asset_id, asset_name, asset_quantity FROM asset WHERE asset_quantity > 3 ORDER BY asset_name');
 $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get employees for dropdown
@@ -36,8 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             throw new Exception('Quantity must be greater than 0');
         }
         
-        // Verify asset exists and has stock
-        $asset = $pdo->prepare('SELECT asset_quantity FROM asset WHERE asset_id = ?');
+        // Start transaction for atomic operation
+        $pdo->beginTransaction();
+        
+        // Verify asset exists and has sufficient stock
+        $asset = $pdo->prepare('SELECT asset_name, asset_quantity FROM asset WHERE asset_id = ? FOR UPDATE');
         $asset->execute([$asset_id]);
         $assetData = $asset->fetch(PDO::FETCH_ASSOC);
         
@@ -45,30 +48,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             throw new Exception('Asset not found');
         }
         
+        $currentQuantity = intval($assetData['asset_quantity']);
+        
+        // Check if sufficient quantity is available (minimum 4 units required to request)
+        if ($currentQuantity <= 3) {
+            throw new Exception("Asset has reached minimum stock level! Cannot request when 3 or fewer units remain. Current stock: {$currentQuantity} units.");
+        }
+        
+        if ($currentQuantity < $quantity) {
+            throw new Exception("Insufficient stock! Only {$currentQuantity} units available. Cannot fulfill request for {$quantity} units.");
+        }
+        
+        // Check if request would leave 3 or fewer units
+        $remainingAfterRequest = $currentQuantity - $quantity;
+        if ($remainingAfterRequest <= 3) {
+            throw new Exception("This request would leave only {$remainingAfterRequest} units in stock. Requests cannot reduce inventory to 3 or fewer units. Please request a smaller quantity.");
+        }
+        
+        // Calculate new quantity after request
+        $newQuantity = $currentQuantity - $quantity;
+        
+        // Update asset quantity (deduct requested amount)
+        $updateStmt = $pdo->prepare('UPDATE asset SET asset_quantity = ? WHERE asset_id = ?');
+        $updateStmt->execute([$newQuantity, $asset_id]);
+        
         // Get the next request_id
         $maxStmt = $pdo->query("SELECT MAX(request_id) as max_id FROM request");
         $maxResult = $maxStmt->fetch(PDO::FETCH_ASSOC);
         $nextId = ($maxResult['max_id'] ?? 0) + 1;
         
         // Insert request
-        $pdo->prepare('INSERT INTO request (request_id, asset_id, quantity_requested, employee_id, request_date) VALUES (?, ?, ?, ?, ?)')
-            ->execute([$nextId, $asset_id, $quantity, $employee_id, $request_date]);
-        logAudit($pdo, $user_id, 'INSERT', 'request', $nextId, "Created request for asset ID $asset_id (Qty: $quantity)");
+        $insertStmt = $pdo->prepare('INSERT INTO request (request_id, asset_id, quantity_requested, employee_id, request_date) VALUES (?, ?, ?, ?, ?)');
+        $insertStmt->execute([$nextId, $asset_id, $quantity, $employee_id, $request_date]);
         
-        $message = 'Request logged successfully!';
+        // Log the request creation
+        logAudit($pdo, $user_id, 'INSERT', 'request', $nextId, "Created request for {$assetData['asset_name']} (Qty: {$quantity})");
+        
+        // Log the inventory adjustment
+        logAudit($pdo, $user_id, 'UPDATE', 'asset', $asset_id, "Reduced {$assetData['asset_name']} inventory from {$currentQuantity} to {$newQuantity} (Request #{$nextId})");
+        
+        // Commit transaction
+        $pdo->commit();
+        
+        $message = "Request logged successfully! {$assetData['asset_name']} inventory reduced to {$newQuantity} units.";
+        if ($newQuantity <= 3) {
+            $message .= " <strong>CRITICAL:</strong> This asset has reached minimum stock level and is now locked from requests!";
+        } elseif ($newQuantity <= 5) {
+            $message .= " <strong>LOW STOCK WARNING:</strong> Only {$newQuantity} units remaining!";
+        }
         $message_type = 'success';
+        
+        // Refresh assets list (only show assets with quantity > 3)
+        $stmt = $pdo->query('SELECT asset_id, asset_name, asset_quantity FROM asset WHERE asset_quantity > 3 ORDER BY asset_name');
+        $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
     } catch (Exception $e) {
+        // Rollback transaction on error
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         $message = 'Error: ' . $e->getMessage();
         $message_type = 'error';
     }
 }
 
-// Get user's requests
+// Get user's requests with inventory impact info
 $stmt = $pdo->query('
     SELECT 
         r.request_id,
         a.asset_name,
         r.quantity_requested,
+        a.asset_quantity as current_stock,
         e.employee_fname,
         e.employee_lname,
         d.department_name,
@@ -326,7 +376,8 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            min-width: 300px;
+            min-width: 400px;
+            max-width: 600px;
         }
 
         .message.success {
@@ -409,10 +460,43 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
         }
 
+        .inner-card.low-stock {
+            border-left: 4px solid #ff9800;
+        }
+
+        .inner-card.out-of-stock {
+            border-left: 4px solid #f44336;
+            opacity: 0.7;
+        }
+
         .item-details {
             display: flex;
             flex-direction: column;
             gap: 4px;
+        }
+
+        .stock-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .stock-badge.low {
+            background: #ff9800;
+            color: white;
+        }
+
+        .stock-badge.out {
+            background: #f44336;
+            color: white;
+        }
+
+        .stock-badge.ok {
+            background: #4caf50;
+            color: white;
         }
 
         /* RIGHT PANEL */
@@ -463,6 +547,29 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .log-btn:hover {
             background: #162897;
         }
+
+        .log-btn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .stock-info {
+            background: rgba(255,255,255,0.15);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .no-stock-warning {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -476,7 +583,7 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <?php if ($message): ?>
             <div class="message <?php echo $message_type; ?>">
-                <?php echo htmlspecialchars($message); ?>
+                <?php echo $message; ?>
             </div>
         <?php endif; ?>
 
@@ -500,16 +607,31 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <div class="scroll-area" id="requestsList">
                     <?php if (!empty($requests)): ?>
-                        <?php foreach ($requests as $req): ?>
-                            <div class="inner-card" 
+                        <?php foreach ($requests as $req): 
+                            $currentStock = intval($req['current_stock']);
+                            $stockClass = '';
+                            $stockBadge = '';
+                            
+                            if ($currentStock <= 3) {
+                                $stockClass = 'out-of-stock';
+                                $stockBadge = '<span class="stock-badge out">LOCKED - MIN STOCK</span>';
+                            } elseif ($currentStock <= 5) {
+                                $stockClass = 'low-stock';
+                                $stockBadge = '<span class="stock-badge low">LOW STOCK</span>';
+                            } else {
+                                $stockBadge = '<span class="stock-badge ok">IN STOCK</span>';
+                            }
+                        ?>
+                            <div class="inner-card <?php echo $stockClass; ?>" 
                                  data-name="<?php echo htmlspecialchars($req['employee_fname'] . ' ' . $req['employee_lname']); ?>" 
                                  data-item="<?php echo htmlspecialchars($req['asset_name']); ?>"
                                  data-qty="<?php echo $req['quantity_requested']; ?>"
                                  data-date="<?php echo $req['request_date']; ?>">
                                 <div class="item-details">
                                     <span><b>Requested by:</b> <?php echo htmlspecialchars($req['employee_fname'] . ' ' . $req['employee_lname']); ?></span>
-                                    <span><b>Requested Item:</b> <?php echo htmlspecialchars($req['asset_name']); ?></span>
-                                    <span><b>Quantity:</b> <?php echo intval($req['quantity_requested']); ?></span>
+                                    <span><b>Requested Item:</b> <?php echo htmlspecialchars($req['asset_name']); ?> <?php echo $stockBadge; ?></span>
+                                    <span><b>Quantity Requested:</b> <?php echo intval($req['quantity_requested']); ?></span>
+                                    <span><b>Current Stock:</b> <?php echo $currentStock; ?> units</span>
                                     <span><b>Department:</b> <?php echo htmlspecialchars($req['department_name'] ?? 'N/A'); ?></span>
                                     <span><b>Date:</b> <?php echo date('m/d/Y', strtotime($req['request_date'])); ?></span>
                                 </div>
@@ -526,9 +648,15 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="right-panel">
                 <h2>Log a Request</h2>
 
-                <form method="POST">
+                <?php if (empty($assets)): ?>
+                    <div class="no-stock-warning">
+                        ⚠️ No assets available for request. All items are out of stock or need to be added to inventory.
+                    </div>
+                <?php endif; ?>
+
+                <form method="POST" id="requestForm">
                     <label>Requested By:</label>
-                    <select name="employee_id" required>
+                    <select name="employee_id" required <?php echo empty($assets) ? 'disabled' : ''; ?>>
                         <option value="">-- Select Employee --</option>
                         <?php foreach ($employees as $emp): ?>
                             <option value="<?php echo $emp['employee_id']; ?>">
@@ -538,23 +666,34 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </select>
 
                     <label>Requested Item:</label>
-                    <select name="asset_id" required>
+                    <select name="asset_id" id="assetSelect" required onchange="updateStockInfo()" <?php echo empty($assets) ? 'disabled' : ''; ?>>
                         <option value="">-- Select Asset --</option>
                         <?php foreach ($assets as $asset): ?>
-                            <option value="<?php echo $asset['asset_id']; ?>">
+                            <option value="<?php echo $asset['asset_id']; ?>" 
+                                    data-stock="<?php echo $asset['asset_quantity']; ?>">
                                 <?php echo htmlspecialchars($asset['asset_name']); ?> 
                                 (<?php echo $asset['asset_quantity']; ?> available)
                             </option>
                         <?php endforeach; ?>
                     </select>
 
+                    <div id="stockInfo" class="stock-info" style="display:none;">
+                        Available Stock: <strong><span id="availableStock">0</span> units</strong>
+                    </div>
+
                     <label>Quantity:</label>
-                    <input type="number" name="quantity" min="1" required>
+                    <input type="number" name="quantity" id="quantityInput" min="1" max="1" 
+                           required oninput="validateQuantity()" <?php echo empty($assets) ? 'disabled' : ''; ?>>
+                    
+                    <div id="quantityWarning" style="display:none; color: #ff6b6b; font-size: 12px; text-align: left; margin: -10px 0 10px 15px;"></div>
 
                     <label>Date:</label>
-                    <input type="date" name="request_date" value="<?php echo date('Y-m-d'); ?>" required>
+                    <input type="date" name="request_date" value="<?php echo date('Y-m-d'); ?>" 
+                           required <?php echo empty($assets) ? 'disabled' : ''; ?>>
 
-                    <button type="submit" name="action" value="submit_request" class="log-btn">Log Request</button>
+                    <button type="submit" name="action" value="submit_request" class="log-btn" id="submitBtn" <?php echo empty($assets) ? 'disabled' : ''; ?>>
+                        Log Request
+                    </button>
                 </form>
             </div>
         </div>
@@ -582,13 +721,63 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         });
 
-        // Auto-hide message after 3 seconds
+        // Auto-hide message after 5 seconds
         const message = document.querySelector('.message');
         if (message) {
             setTimeout(() => {
                 message.style.opacity = '0';
                 setTimeout(() => message.remove(), 300);
-            }, 3000);
+            }, 5000);
+        }
+
+        // Update stock info when asset is selected
+        function updateStockInfo() {
+            const select = document.getElementById('assetSelect');
+            const stockInfo = document.getElementById('stockInfo');
+            const availableStock = document.getElementById('availableStock');
+            const quantityInput = document.getElementById('quantityInput');
+            
+            if (select.value) {
+                const option = select.options[select.selectedIndex];
+                const stock = parseInt(option.getAttribute('data-stock'));
+                
+                availableStock.textContent = stock;
+                stockInfo.style.display = 'block';
+                quantityInput.max = stock;
+                quantityInput.value = Math.min(1, stock);
+                validateQuantity();
+            } else {
+                stockInfo.style.display = 'none';
+                quantityInput.max = 1;
+            }
+        }
+
+        // Validate quantity input
+        function validateQuantity() {
+            const quantityInput = document.getElementById('quantityInput');
+            const warning = document.getElementById('quantityWarning');
+            const submitBtn = document.getElementById('submitBtn');
+            const select = document.getElementById('assetSelect');
+            
+            if (!select.value) return;
+            
+            const option = select.options[select.selectedIndex];
+            const maxStock = parseInt(option.getAttribute('data-stock'));
+            const requested = parseInt(quantityInput.value) || 0;
+            
+            if (requested > maxStock) {
+                warning.textContent = `⚠️ Cannot request more than ${maxStock} units!`;
+                warning.style.display = 'block';
+                submitBtn.disabled = true;
+                quantityInput.value = maxStock;
+            } else if (requested <= 0) {
+                warning.textContent = '⚠️ Quantity must be at least 1';
+                warning.style.display = 'block';
+                submitBtn.disabled = true;
+            } else {
+                warning.style.display = 'none';
+                submitBtn.disabled = false;
+            }
         }
 
         // Search functionality
