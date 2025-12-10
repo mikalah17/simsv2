@@ -340,7 +340,8 @@ $email = isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'ema
             border-radius: 12px;
             margin-bottom: 15px;
             overflow: hidden;
-            max-height: 150px;
+            min-height: 100px;
+            max-height: 400px;
         }
 
         .line-numbers {
@@ -353,6 +354,9 @@ $email = isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'ema
             border-right: 1px solid #ddd;
             overflow: hidden;
             user-select: none;
+            text-align: right;
+            min-width: 35px;
+            white-space: pre;
         }
 
         .query-input {
@@ -365,6 +369,9 @@ $email = isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'ema
             resize: none;
             overflow: auto;
             color: #333;
+            line-height: 1.6;
+            tab-size: 4;
+            -moz-tab-size: 4;
         }
 
         .button-row {
@@ -602,6 +609,11 @@ $email = isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'ema
                 numberString += i + '\n';
             }
             lineNumbers.textContent = numberString;
+            
+            // Auto-expand textarea height
+            queryInput.style.height = 'auto';
+            const scrollHeight = queryInput.scrollHeight;
+            queryInput.style.height = Math.min(scrollHeight, 400) + 'px';
         }
 
         queryInput.addEventListener('input', updateLineNumbers);
