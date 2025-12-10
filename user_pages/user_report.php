@@ -603,9 +603,9 @@ foreach ($weeklyData as $row) {
                     <div class="chart-header">
                         <h3>Top 5 Requested Assets</h3>
                         <select class="dept-filter" id="deptFilter" onchange="updatePieChart(this.value)">
-                            <option value="all">All Departments</option>
+                            <option value="all" <?php echo $selectedDept === 'all' ? 'selected' : ''; ?>>All Departments</option>
                             <?php foreach ($deptStats as $dept): ?>
-                                <option value="<?php echo htmlspecialchars($dept['department_name']); ?>">
+                                <option value="<?php echo htmlspecialchars($dept['department_name']); ?>" <?php echo $selectedDept === $dept['department_name'] ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($dept['department_name'] ?? 'Unassigned'); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -645,8 +645,22 @@ foreach ($weeklyData as $row) {
         const weeklyByDept = <?php echo json_encode($weeklyByDept); ?>;
         const assetNames = <?php echo json_encode($assetNames); ?>;
         const assetQuantities = <?php echo json_encode($assetQuantities); ?>;
+        const selectedDays = <?php echo $days; ?>;
+        const selectedDept = '<?php echo htmlspecialchars($selectedDept); ?>';
         
         const colors = ['#4472C4', '#FFC000', '#FF0000', '#FF00FF', '#00B050', '#7030A0'];
+        
+        // Get time range label
+        const timeRangeLabels = {
+            7: 'Last 7 Days',
+            14: 'Last 14 Days',
+            30: 'Last 30 Days',
+            90: 'Last 3 Months',
+            180: 'Last 6 Months',
+            365: 'Last Year'
+        };
+        const timeLabel = timeRangeLabels[selectedDays] || 'Last ' + selectedDays + ' Days';
+        const deptLabel = selectedDept === 'all' ? 'All Departments' : selectedDept;
         
         // Prepare datasets for line chart
         const datasets = [];
@@ -774,7 +788,9 @@ foreach ($weeklyData as $row) {
                     },
                     title: {
                         display: true,
-                        text: 'Total Quantity Requested by Asset Type',
+                        text: selectedDept === 'all' 
+                            ? 'Top 5 Requested Assets - All Departments (' + timeLabel + ')'
+                            : 'Top 5 Requested Assets - ' + deptLabel + ' (' + timeLabel + ')',
                         font: {
                             size: 16,
                             weight: 'bold',
@@ -808,7 +824,7 @@ foreach ($weeklyData as $row) {
             window.location.href = `user_report.php?dept=${encodeURIComponent(dept)}`;
         }
 
-        // PDF Generation Function
+        // PDF Generation Function with Legends
         async function generatePDF() {
             const btn = document.getElementById('generateBtn');
             const overlay = document.getElementById('loadingOverlay');
@@ -824,43 +840,135 @@ foreach ($weeklyData as $row) {
                 const pageHeight = pdf.internal.pageSize.getHeight();
                 let yOffset = 20;
 
-                // Title
+                // Use already defined time range label and dept label
                 pdf.setFontSize(24);
                 pdf.setTextColor(15, 27, 101);
                 pdf.text('Inventory Management Report', pageWidth / 2, yOffset, { align: 'center' });
                 
                 yOffset += 10;
-                pdf.setFontSize(12);
-                pdf.setTextColor(100, 100, 100);
-                pdf.text('Generated on: ' + new Date().toLocaleString(), pageWidth / 2, yOffset, { align: 'center' });
-                
-                yOffset += 15;
 
-                // Capture Line Chart
-                const lineChartCanvas = document.getElementById('lineChart');
-                const lineChartImg = lineChartCanvas.toDataURL('image/png');
-                pdf.setFontSize(14);
-                pdf.setTextColor(15, 27, 101);
-                pdf.text('Request Trends by Department (Last 7 Days)', 15, yOffset);
+                // Add filters subtitle
+                pdf.setFontSize(11);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text('Report Period: ' + timeLabel + ' | Department: ' + deptLabel, pageWidth / 2, yOffset, { align: 'center' });
                 yOffset += 8;
-                pdf.addImage(lineChartImg, 'PNG', 15, yOffset, 180, 90);
-                yOffset += 95;
 
                 // Check if we need a new page
-                if (yOffset > pageHeight - 100) {
+                if (yOffset > pageHeight - 110) {
                     pdf.addPage();
                     yOffset = 20;
                 }
 
-                // Capture Pie Chart
-                const pieChartCanvas = document.getElementById('pieChart');
-                const pieChartImg = pieChartCanvas.toDataURL('image/png');
+                // ========== LINE CHART WITH LEGEND ==========
                 pdf.setFontSize(14);
                 pdf.setTextColor(15, 27, 101);
-                pdf.text('Top 5 Requested Assets', 15, yOffset);
+                pdf.text('Request Trends by Department (' + timeLabel + ')', 15, yOffset);
                 yOffset += 8;
-                pdf.addImage(pieChartImg, 'PNG', 35, yOffset, 140, 90);
-                yOffset += 95;
+                
+                const lineChartCanvas = document.getElementById('lineChart');
+                const lineChartImg = lineChartCanvas.toDataURL('image/png');
+                pdf.addImage(lineChartImg, 'PNG', 15, yOffset, 180, 80);
+                yOffset += 85;
+
+                // Add Line Chart Legend
+                pdf.setFontSize(12);
+                pdf.setTextColor(15, 27, 101);
+                pdf.text('Legend - Departments:', 15, yOffset);
+                yOffset += 6;
+
+                // Draw legend items for line chart
+                const lineLegendItems = <?php echo json_encode(array_map(function($dept) use ($colors) {
+                    static $i = 0;
+                    $color = $colors[$i % count($colors)];
+                    $i++;
+                    return [
+                        'name' => $dept['department_name'] ?? 'Unassigned',
+                        'color' => $color
+                    ];
+                }, $deptStats)); ?>;
+
+                lineLegendItems.forEach((item, index) => {
+                    if (yOffset > pageHeight - 15) {
+                        pdf.addPage();
+                        yOffset = 20;
+                    }
+
+                    // Convert hex color to RGB
+                    const hex = item.color.replace('#', '');
+                    const r = parseInt(hex.substr(0, 2), 16);
+                    const g = parseInt(hex.substr(2, 2), 16);
+                    const b = parseInt(hex.substr(4, 2), 16);
+                    
+                    // Draw colored circle
+                    pdf.setFillColor(r, g, b);
+                    pdf.circle(18, yOffset - 1, 2, 'F');
+                    
+                    // Draw label
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(50, 50, 50);
+                    pdf.text(item.name, 23, yOffset);
+                    yOffset += 6;
+                });
+
+                yOffset += 10;
+
+                // ========== PIE CHART WITH LEGEND ==========
+                if (yOffset > pageHeight - 110) {
+                    pdf.addPage();
+                    yOffset = 20;
+                }
+
+                pdf.setFontSize(14);
+                pdf.setTextColor(15, 27, 101);
+                const pieTitle = selectedDept === 'all' 
+                    ? 'Top 5 Requested Assets - All Departments (' + timeLabel + ')'
+                    : 'Top 5 Requested Assets - ' + deptLabel + ' (' + timeLabel + ')';
+                pdf.text(pieTitle, 15, yOffset);
+                yOffset += 8;
+                
+                const pieChartCanvas = document.getElementById('pieChart');
+                const pieChartImg = pieChartCanvas.toDataURL('image/png');
+                pdf.addImage(pieChartImg, 'PNG', 35, yOffset, 140, 80);
+                yOffset += 85;
+
+                // Add Pie Chart Legend
+                pdf.setFontSize(12);
+                pdf.setTextColor(15, 27, 101);
+                pdf.text('Legend - Assets:', 15, yOffset);
+                yOffset += 6;
+
+                // Draw legend items for pie chart
+                const pieLegendItems = <?php echo json_encode(array_map(function($asset, $index) {
+                    $pieColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#A8E6CF', '#F38181', '#AA96DA'];
+                    return [
+                        'name' => $asset['asset_name'],
+                        'quantity' => $asset['total_quantity_requested'],
+                        'color' => $pieColors[$index % count($pieColors)]
+                    ];
+                }, $topAssets, array_keys($topAssets))); ?>;
+
+                pieLegendItems.forEach((item, index) => {
+                    if (yOffset > pageHeight - 15) {
+                        pdf.addPage();
+                        yOffset = 20;
+                    }
+
+                    // Convert hex color to RGB
+                    const hex = item.color.replace('#', '');
+                    const r = parseInt(hex.substr(0, 2), 16);
+                    const g = parseInt(hex.substr(2, 2), 16);
+                    const b = parseInt(hex.substr(4, 2), 16);
+                    
+                    // Draw colored circle
+                    pdf.setFillColor(r, g, b);
+                    pdf.circle(18, yOffset - 1, 2, 'F');
+                    
+                    // Draw label with quantity
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(50, 50, 50);
+                    pdf.text(item.name + ' (' + item.quantity + ' units)', 23, yOffset);
+                    yOffset += 6;
+                });
 
                 // New page for assets list
                 pdf.addPage();
@@ -931,4 +1039,56 @@ foreach ($weeklyData as $row) {
     </script>
 
 </body>
-</html>
+</html> += 10;
+                pdf.setFontSize(12);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text('Generated on: ' + new Date().toLocaleString(), pageWidth / 2, yOffset, { align: 'center' });
+                
+                yOffset += 15;
+
+                // ========== LINE CHART WITH LEGEND ==========
+                const lineChartCanvas = document.getElementById('lineChart');
+                const lineChartImg = lineChartCanvas.toDataURL('image/png');
+                pdf.setFontSize(14);
+                pdf.setTextColor(15, 27, 101);
+                pdf.text('Request Trends by Department (Last <?php echo $days; ?> Days)', 15, yOffset);
+                yOffset += 8;
+                pdf.addImage(lineChartImg, 'PNG', 15, yOffset, 180, 80);
+                yOffset += 85;
+
+                // Add Line Chart Legend
+                pdf.setFontSize(12);
+                pdf.setTextColor(15, 27, 101);
+                pdf.text('Legend:', 15, yOffset);
+                yOffset += 6;
+
+                // Draw legend items for line chart
+                const lineLegendItems = <?php echo json_encode(array_map(function($dept) use ($colors) {
+                    static $i = 0;
+                    $color = $colors[$i % count($colors)];
+                    $i++;
+                    return [
+                        'name' => $dept['department_name'] ?? 'Unassigned',
+                        'color' => $color
+                    ];
+                }, $deptStats)); ?>;
+
+                lineLegendItems.forEach((item, index) => {
+                    // Convert hex color to RGB
+                    const hex = item.color.replace('#', '');
+                    const r = parseInt(hex.substr(0, 2), 16);
+                    const g = parseInt(hex.substr(2, 2), 16);
+                    const b = parseInt(hex.substr(4, 2), 16);
+                    
+                    // Draw colored circle
+                    pdf.setFillColor(r, g, b);
+                    pdf.circle(18, yOffset - 1, 2, 'F');
+                    
+                    // Draw label
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(50, 50, 50);
+                    pdf.text(item.name, 23, yOffset);
+                    yOffset += 6;
+                });
+
+                yOffset
