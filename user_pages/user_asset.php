@@ -22,6 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('Invalid asset name or quantity');
                 }
                 
+                // Check if asset name already exists
+                $checkStmt = $pdo->prepare('SELECT asset_id FROM asset WHERE asset_name = ?');
+                $checkStmt->execute([$name]);
+                if ($checkStmt->fetch()) {
+                    throw new Exception('An asset with this name already exists');
+                }
+                
                 // Get next asset_id
                 $result = $pdo->query('SELECT MAX(asset_id) AS maxId FROM asset');
                 $row = $result->fetch(PDO::FETCH_ASSOC);
@@ -29,22 +36,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->prepare('INSERT INTO asset (asset_id, asset_name, asset_quantity) VALUES (?, ?, ?)')
                     ->execute([$nextId, $name, $quantity]);
+                
                 logAudit($pdo, $user_id, 'INSERT', 'asset', $nextId, "Added asset: $name (Qty: $quantity)");
+                
                 $message = 'Asset added successfully!';
                 $message_type = 'success';
             }
             
             elseif ($_POST['action'] === 'update') {
                 $asset_id = intval($_POST['asset_id'] ?? 0);
-                $quantity = intval($_POST['asset_quantity'] ?? 0);
+                $new_name = trim($_POST['asset_name'] ?? '');
+                $new_quantity = intval($_POST['asset_quantity'] ?? 0);
                 
-                if (!$asset_id || $quantity < 0) {
-                    throw new Exception('Invalid asset ID or quantity');
+                if (!$asset_id || !$new_name || $new_quantity < 0) {
+                    throw new Exception('Invalid asset data');
                 }
                 
-                $pdo->prepare('UPDATE asset SET asset_quantity = ? WHERE asset_id = ?')
-                    ->execute([$quantity, $asset_id]);
-                logAudit($pdo, $user_id, 'UPDATE', 'asset', $asset_id, "Updated asset quantity to: $quantity");
+                // Get current asset data
+                $stmt = $pdo->prepare('SELECT asset_name, asset_quantity FROM asset WHERE asset_id = ?');
+                $stmt->execute([$asset_id]);
+                $current = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$current) {
+                    throw new Exception('Asset not found');
+                }
+                
+                $old_name = $current['asset_name'];
+                $old_quantity = intval($current['asset_quantity']);
+                
+                // Determine what changed
+                $name_changed = ($old_name !== $new_name);
+                $quantity_changed = ($old_quantity !== $new_quantity);
+                
+                if (!$name_changed && !$quantity_changed) {
+                    throw new Exception('No changes detected');
+                }
+                
+                // If name changed, check if new name already exists
+                if ($name_changed) {
+                    $checkStmt = $pdo->prepare('SELECT asset_id FROM asset WHERE asset_name = ? AND asset_id != ?');
+                    $checkStmt->execute([$new_name, $asset_id]);
+                    if ($checkStmt->fetch()) {
+                        throw new Exception('An asset with this name already exists');
+                    }
+                }
+                
+                // Update the asset
+                $updateStmt = $pdo->prepare('UPDATE asset SET asset_name = ?, asset_quantity = ? WHERE asset_id = ?');
+                $updateStmt->execute([$new_name, $new_quantity, $asset_id]);
+                
+                // Create appropriate audit log entry based on what changed
+                if ($name_changed && $quantity_changed) {
+                    $action_desc = "Updated asset: changed name from '$old_name' to '$new_name' and quantity from $old_quantity to $new_quantity";
+                } elseif ($name_changed) {
+                    $action_desc = "Updated asset name from '$old_name' to '$new_name'";
+                } elseif ($quantity_changed) {
+                    $action_desc = "Updated asset '$old_name' quantity from $old_quantity to $new_quantity";
+                }
+                
+                logAudit($pdo, $user_id, 'UPDATE', 'asset', $asset_id, $action_desc);
+                
                 $message = 'Asset updated successfully!';
                 $message_type = 'success';
             }
@@ -54,6 +105,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 if (!$asset_id) {
                     throw new Exception('Invalid asset ID');
+                }
+                
+                // Get asset name before deletion
+                $stmt = $pdo->prepare('SELECT asset_name, asset_quantity FROM asset WHERE asset_id = ?');
+                $stmt->execute([$asset_id]);
+                $assetData = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$assetData) {
+                    throw new Exception('Asset not found');
                 }
                 
                 // Check if asset has requests
@@ -66,7 +126,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 $pdo->prepare('DELETE FROM asset WHERE asset_id = ?')->execute([$asset_id]);
-                logAudit($pdo, $user_id, 'DELETE', 'asset', $asset_id, "Deleted asset ID: $asset_id");
+                
+                logAudit($pdo, $user_id, 'DELETE', 'asset', $asset_id, "Deleted asset '{$assetData['asset_name']}' (quantity: {$assetData['asset_quantity']})");
+                
                 $message = 'Asset deleted successfully!';
                 $message_type = 'success';
             }
@@ -554,7 +616,7 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <span><b>Item:</b> <?php echo htmlspecialchars($asset['asset_name']); ?></span>
                                     <span><b>Quantity:</b> <?php echo intval($asset['asset_quantity']); ?></span>
                                 </div>
-                                <button class="edit-btn" onclick="showEditPanel(<?php echo $asset['asset_id']; ?>, '<?php echo htmlspecialchars($asset['asset_name']); ?>', <?php echo $asset['asset_quantity']; ?>)">Edit</button>
+                                <button class="edit-btn" onclick="showEditPanel(<?php echo $asset['asset_id']; ?>, '<?php echo htmlspecialchars(addslashes($asset['asset_name'])); ?>', <?php echo $asset['asset_quantity']; ?>)">Edit</button>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -583,7 +645,7 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <h2>Edit an Item</h2>
 
                 <label>Item:</label>
-                <input type="text" id="editItemName" readonly style="background: #f0f0f0;">
+                <input type="text" id="editItemName">
 
                 <label>Quantity:</label>
                 <input type="number" id="editItemQuantity" min="0">
@@ -632,7 +694,13 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         function saveItem() {
             const assetId = document.getElementById('editItemId').value;
+            const name = document.getElementById('editItemName').value.trim();
             const qty = document.getElementById('editItemQuantity').value;
+
+            if (!name) {
+                alert('Asset name cannot be empty');
+                return;
+            }
 
             if (qty < 0) {
                 alert('Quantity cannot be negative');
@@ -644,6 +712,7 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             form.innerHTML = `
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="asset_id" value="${assetId}">
+                <input type="hidden" name="asset_name" value="${name}">
                 <input type="hidden" name="asset_quantity" value="${qty}">
             `;
             document.body.appendChild(form);
@@ -708,6 +777,15 @@ $assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             });
             cards.forEach(card => container.appendChild(card));
         });
+
+        // Auto-hide message after 5 seconds
+        const message = document.querySelector('.message');
+        if (message) {
+            setTimeout(() => {
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 300);
+            }, 5000);
+        }
     </script>
 
 </body>

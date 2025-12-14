@@ -112,7 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Get user's requests with inventory impact info
+// ============================================================================
+// MODIFIED SECTION: Get user's requests with inventory impact info
+// Now sorted by stock status (locked first, then low stock, then normal)
+// ============================================================================
 $stmt = $pdo->query('
     SELECT 
         r.request_id,
@@ -122,14 +125,22 @@ $stmt = $pdo->query('
         e.employee_fname,
         e.employee_lname,
         d.department_name,
-        r.request_date
+        r.request_date,
+        CASE 
+            WHEN a.asset_quantity <= 3 THEN 1
+            WHEN a.asset_quantity <= 5 THEN 2
+            ELSE 3
+        END as stock_priority
     FROM request r
     JOIN asset a ON r.asset_id = a.asset_id
     JOIN employee e ON r.employee_id = e.employee_id
     LEFT JOIN dept d ON e.department_id = d.department_id
-    ORDER BY r.request_date DESC
+    ORDER BY stock_priority ASC, r.request_date DESC
 ');
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// ============================================================================
+// END MODIFIED SECTION
+// ============================================================================
 ?>
 <!DOCTYPE html>
 <html>
@@ -151,7 +162,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             overflow: hidden;
         }
 
-        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -237,7 +247,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background: rgba(15, 27, 101, 0.85);
         }
 
-        /* Profile Panel */
         .profile-panel {
             position: absolute;
             top: 120px;
@@ -340,7 +349,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             padding-bottom: 30px;
         }
 
-        /* Main content */
         .main-content {
             margin-left: 220px;
             padding: 40px;
@@ -364,7 +372,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             font-size: 36px;
         }
 
-        /* Message alerts */
         .message {
             padding: 15px;
             border-radius: 12px;
@@ -392,14 +399,12 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             border: 1px solid rgba(220, 53, 69, 1);
         }
 
-        /* Layout */
         .content-wrapper {
             display: flex;
             gap: 25px;
             height: calc(100vh - 120px);
         }
 
-        /* LEFT PANEL */
         .request-panel {
             flex: 2;
             background: rgba(255,255,255,0.12);
@@ -499,7 +504,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: white;
         }
 
-        /* RIGHT PANEL */
         .right-panel {
             flex: 1;
             padding: 25px;
@@ -577,7 +581,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <?php include __DIR__ . '/user_sidebar.php'; ?>
 
-    <!-- Main Content -->
     <div class="main-content">
         <h1>Request Log</h1>
 
@@ -589,13 +592,13 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="content-wrapper">
 
-            <!-- LEFT side - Request History -->
             <div class="request-panel">
 
                 <div class="request-header">
                     <input type="text" class="search-bar" id="searchInput" placeholder="Search">
 
                     <select class="sort-btn" id="sortSelect">
+                        <option value="stock-priority">Stock Priority (Default)</option>
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
                         <option value="name-asc">Name A-Z</option>
@@ -611,6 +614,7 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             $currentStock = intval($req['current_stock']);
                             $stockClass = '';
                             $stockBadge = '';
+                            $stockPriority = $req['stock_priority'];
                             
                             if ($currentStock <= 3) {
                                 $stockClass = 'out-of-stock';
@@ -626,7 +630,8 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                  data-name="<?php echo htmlspecialchars($req['employee_fname'] . ' ' . $req['employee_lname']); ?>" 
                                  data-item="<?php echo htmlspecialchars($req['asset_name']); ?>"
                                  data-qty="<?php echo $req['quantity_requested']; ?>"
-                                 data-date="<?php echo $req['request_date']; ?>">
+                                 data-date="<?php echo $req['request_date']; ?>"
+                                 data-stock-priority="<?php echo $stockPriority; ?>">
                                 <div class="item-details">
                                     <span><b>Requested by:</b> <?php echo htmlspecialchars($req['employee_fname'] . ' ' . $req['employee_lname']); ?></span>
                                     <span><b>Requested Item:</b> <?php echo htmlspecialchars($req['asset_name']); ?> <?php echo $stockBadge; ?></span>
@@ -644,7 +649,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             </div>
 
-            <!-- RIGHT side - Log Request Form -->
             <div class="right-panel">
                 <h2>Log a Request</h2>
 
@@ -721,7 +725,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         });
 
-        // Auto-hide message after 5 seconds
         const message = document.querySelector('.message');
         if (message) {
             setTimeout(() => {
@@ -730,7 +733,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }, 5000);
         }
 
-        // Update stock info when asset is selected
         function updateStockInfo() {
             const select = document.getElementById('assetSelect');
             const stockInfo = document.getElementById('stockInfo');
@@ -752,7 +754,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         }
 
-        // Validate quantity input
         function validateQuantity() {
             const quantityInput = document.getElementById('quantityInput');
             const warning = document.getElementById('quantityWarning');
@@ -780,7 +781,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         }
 
-        // Search functionality
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const cards = document.querySelectorAll('.inner-card');
@@ -796,7 +796,6 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             });
         });
 
-        // Sort functionality
         document.getElementById('sortSelect').addEventListener('change', function(e) {
             const sortBy = e.target.value;
             const container = document.getElementById('requestsList');
@@ -806,11 +805,18 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 const nameA = a.dataset.name.toLowerCase();
                 const nameB = b.dataset.name.toLowerCase();
                 const qtyA = parseInt(a.dataset.qty);
-                const qtyB = parseInt(b.dataset.qty);
+                const qtyB = parseInt(a.dataset.qty);
                 const dateA = new Date(a.dataset.date);
                 const dateB = new Date(b.dataset.date);
+                const priorityA = parseInt(a.dataset.stockPriority);
+                const priorityB = parseInt(b.dataset.stockPriority);
                 
                 switch(sortBy) {
+                    case 'stock-priority':
+                        if (priorityA !== priorityB) {
+                            return priorityA - priorityB;
+                        }
+                        return dateB - dateA;
                     case 'name-asc':
                         return nameA.localeCompare(nameB);
                     case 'name-desc':
