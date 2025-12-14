@@ -41,6 +41,28 @@ try {
         $_SESSION['role'] = $_SESSION['role_type'];
         $_SESSION['logged_in'] = true;
 
+        // === AUDIT RECORDING ===
+        // Get next audit_id
+        $auditIdStmt = $pdo->query('SELECT MAX(audit_id) AS m FROM audit');
+        $auditRow = $auditIdStmt->fetch();
+        $nextAuditId = 1;
+        if ($auditRow && isset($auditRow['m']) && $auditRow['m'] !== null) {
+            $nextAuditId = ((int)$auditRow['m']) + 1;
+        }
+
+        // Insert audit record
+        $auditStmt = $pdo->prepare('INSERT INTO audit (audit_id, user_id, actionType, tableAffected, record_id, action_desc, actionTime) VALUES (:aid, :uid, :atype, :table, :rid, :desc, :time)');
+        $auditStmt->execute([
+            ':aid' => $nextAuditId,
+            ':uid' => $user['user_id'],
+            ':atype' => 'LOGIN',
+            ':table' => 'users',
+            ':rid' => $user['user_id'],
+            ':desc' => 'User logged in',
+            ':time' => date('Y-m-d H:i:s')
+        ]);
+        // === END AUDIT ===
+
         // Redirect based on role
         if (strtolower($_SESSION['role_type']) === 'admin') {
             header('Location: ../admin_pages/admin_dashboard.php');
